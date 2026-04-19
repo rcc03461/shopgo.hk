@@ -41,8 +41,25 @@ export function setAuthSessionCookie(event: H3Event, token: string) {
 
 export function clearAuthSessionCookie(event: H3Event) {
   const domain = resolveSessionCookieDomain(event)
+  // 先清理当前 host 的 host-only cookie（兼容旧版本可能写过 host-only）。
   deleteCookie(event, AUTH_COOKIE, {
     path: '/',
-    ...(domain ? { domain } : {}),
   })
+
+  // 再清理跨子网域 cookie（当前正式写入方式）。
+  if (domain) {
+    deleteCookie(event, AUTH_COOKIE, {
+      path: '/',
+      domain,
+    })
+
+    // 部分浏览器/历史实现对 leading dot 处理不同，补一层无 dot 兜底。
+    const normalized = domain.startsWith('.') ? domain.slice(1) : domain
+    if (normalized) {
+      deleteCookie(event, AUTH_COOKIE, {
+        path: '/',
+        domain: normalized,
+      })
+    }
+  }
 }

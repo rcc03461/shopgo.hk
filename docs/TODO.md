@@ -6,7 +6,7 @@
 
 ## 已完成（摘要）
 
-- [x] 主站：`/`、`/login`、`/register`、JWT Session、`tenants` / `users`、Drizzle migration 流程
+- [x] 主站：`/`、`/admin/login`、`/admin/register`、JWT Session、`tenants` / `users`、Drizzle migration 流程
 - [x] 跨子網域 Cookie（`Domain=.{tenantRootDomain}`）、`authCookie` 集中寫入／清除
 - [x] 主站登入／註冊成功 → 導向 `{slug}.{tenantRootDomain}/admin/dashboard`
 - [x] `tenantSlug` middleware（含客戶端 `window.location.host` fallback）

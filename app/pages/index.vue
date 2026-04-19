@@ -31,10 +31,10 @@ const tenantSlug = useState<string | null>('oshop-tenant-slug')
         進入後台
       </NuxtLink>
       <NuxtLink
-        to="/login"
+        to="/admin/login"
         class="inline-flex rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
       >
-        登入
+        管理員登入
       </NuxtLink>
     </div>
   </div>
@@ -54,16 +54,16 @@ const tenantSlug = useState<string | null>('oshop-tenant-slug')
       </p>
       <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <NuxtLink
-          to="/register"
+          to="/admin/register"
           class="inline-flex w-full max-w-xs items-center justify-center rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 sm:w-auto"
         >
           立即開店
         </NuxtLink>
         <NuxtLink
-          to="/login"
+          to="/admin/login"
           class="inline-flex w-full max-w-xs items-center justify-center rounded-md border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 sm:w-auto"
         >
-          已有帳號？登入
+          已有商店？管理員登入
         </NuxtLink>
       </div>
     </section>

@@ -78,16 +78,16 @@ async function handleLogout() {
           </template>
           <template v-else>
             <NuxtLink
-              to="/login"
+              :to="tenantSlug ? '/login' : '/admin/login'"
               class="rounded-md px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50"
             >
               登入
             </NuxtLink>
             <NuxtLink
-              to="/register"
+              :to="tenantSlug ? '/register' : '/admin/register'"
               class="rounded-md bg-neutral-900 px-3 py-1.5 font-medium text-white hover:bg-neutral-800"
             >
-              開店註冊
+              {{ tenantSlug ? '會員註冊' : '開店註冊' }}
             </NuxtLink>
           </template>
         </nav>

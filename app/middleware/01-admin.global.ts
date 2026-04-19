@@ -22,10 +22,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   })
 
   if (!me.user) {
-    return navigateTo(`/login?redirect=${encodeURIComponent(to.fullPath)}`)
+    return navigateTo(`/admin/login?redirect=${encodeURIComponent(to.fullPath)}`)
   }
 
   if (me.user.shopSlug !== tenantSlug.value) {
-    return navigateTo('/login')
+    return navigateTo('/admin/login')
   }
 })

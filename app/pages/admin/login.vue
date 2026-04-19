@@ -3,31 +3,37 @@ definePageMeta({
   layout: 'default',
 })
 
-const tenantSlug = useState<string | null>('oshop-tenant-slug')
-
-if (!tenantSlug.value) {
-  await navigateTo('/admin/register')
-}
-
-const name = ref('')
+const route = useRoute()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
+const tenantSlug = useState<string | null>('oshop-tenant-slug')
 
 async function onSubmit() {
   errorMessage.value = null
   loading.value = true
   try {
-    /**
-     * Tenant 會員註冊 API 尚未接入，
-     * 先保留表單與互動，避免路由空缺。
-     */
-    await new Promise(resolve => setTimeout(resolve, 300))
-    throw createError({
-      statusCode: 501,
-      statusMessage: '租戶會員註冊尚未開放',
+    const res = await $fetch<{
+      ok: true
+      tenant: { shopSlug: string }
+      user: { email: string }
+    }>('/api/auth/login', {
+      method: 'POST',
+      body: { email: email.value, password: password.value },
     })
+
+    if (tenantSlug.value) {
+      const redirect =
+        typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
+          ? route.query.redirect
+          : '/admin/dashboard'
+      await navigateTo(redirect)
+      return
+    }
+
+    const adminUrl = useTenantAdminEntryUrl(res.tenant.shopSlug)
+    await navigateTo(adminUrl, { external: true })
   } catch (e: unknown) {
     const err = e as {
       data?: { message?: string }
@@ -38,7 +44,7 @@ async function onSubmit() {
       err.data?.message ||
       err.statusMessage ||
       err.message ||
-      '註冊失敗，請稍後再試'
+      '登入失敗，請稍後再試'
   } finally {
     loading.value = false
   }
@@ -48,30 +54,18 @@ async function onSubmit() {
 <template>
   <div class="mx-auto max-w-md px-4 py-16 sm:px-6">
     <h1 class="text-xl font-semibold tracking-tight text-neutral-900">
-      會員註冊
+      管理員登入
     </h1>
     <p class="mt-2 text-sm text-neutral-600">
-      建立 <span class="font-mono">{{ tenantSlug }}</span> 商店會員帳號。
+      <template v-if="tenantSlug">
+        登入 <span class="font-mono">{{ tenantSlug }}</span> 商店管理帳號。
+      </template>
+      <template v-else>
+        使用註冊時的電子郵件與密碼登入；成功後將前往該商店的後台總覽。
+      </template>
     </p>
 
     <form class="mt-8 space-y-4" @submit.prevent="onSubmit">
-      <div>
-        <label
-          class="block text-xs font-medium text-neutral-700"
-          for="name"
-        >
-          暱稱
-        </label>
-        <input
-          id="name"
-          v-model="name"
-          type="text"
-          autocomplete="name"
-          required
-          placeholder="例如 王小明"
-          class="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none ring-neutral-900 focus:border-neutral-900 focus:ring-1"
-        >
-      </div>
       <div>
         <label class="block text-xs font-medium text-neutral-700" for="email">
           電子郵件
@@ -96,12 +90,10 @@ async function onSubmit() {
           id="password"
           v-model="password"
           type="password"
-          autocomplete="new-password"
+          autocomplete="current-password"
           required
-          minlength="8"
           class="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none ring-neutral-900 focus:border-neutral-900 focus:ring-1"
         >
-        <p class="mt-1 text-xs text-neutral-500">至少 8 字元。</p>
       </div>
 
       <p v-if="errorMessage" class="text-sm text-red-600">
@@ -113,20 +105,14 @@ async function onSubmit() {
         class="w-full rounded-md bg-neutral-900 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
         :disabled="loading"
       >
-        {{ loading ? '建立中…' : '會員註冊' }}
+        {{ loading ? '登入中…' : '登入' }}
       </button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-neutral-600">
-      已經有帳號？
-      <NuxtLink to="/login" class="font-medium text-neutral-900 underline">
-        登入
-      </NuxtLink>
-    </p>
-    <p class="mt-2 text-center text-xs text-neutral-500">
-      若你要建立商店，請改用
-      <NuxtLink to="/admin/register" class="font-medium underline">
-        /admin/register
+    <p v-if="!tenantSlug" class="mt-6 text-center text-sm text-neutral-600">
+      還沒有商店帳號？
+      <NuxtLink to="/admin/register" class="font-medium text-neutral-900 underline">
+        前往開店註冊
       </NuxtLink>
     </p>
   </div>
