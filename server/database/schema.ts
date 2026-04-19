@@ -1,8 +1,10 @@
+import { sql } from 'drizzle-orm'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import {
   bigint,
   index,
   integer,
+  jsonb,
   numeric,
   pgTable,
   text,
@@ -12,9 +14,17 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 
+/** 商店前台／後台設定（不需單獨索引搜尋的欄位集中於此 JSON） */
+export type TenantSettingsJson = Record<string, unknown>
+
 export const tenants = pgTable('tenants', {
   id: uuid('id').defaultRandom().primaryKey(),
   shopSlug: varchar('shop_slug', { length: 64 }).notNull().unique(),
+  /** 店名、Logo、聯絡方式、社群連結等非結構化設定 */
+  settings: jsonb('settings')
+    .$type<TenantSettingsJson>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

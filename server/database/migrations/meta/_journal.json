@@ -36,6 +36,13 @@
       "when": 1776620000000,
       "tag": "0004_product_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776630000000,
+      "tag": "0005_tenant_shop_settings",
+      "breakpoints": true
     }
   ]
 }

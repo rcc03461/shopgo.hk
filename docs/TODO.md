@@ -19,7 +19,7 @@
 ## Admin 後台（Phase C — 資料與互動）
 
 - [ ] **設定**：擴充 `tenants`（或獨立表）欄位；`/admin/settings` 讀寫店名、聯絡方式等 API + 表單
-- [ ] **分類**：Drizzle schema、`/admin/categories` 列表／新增／編輯 API + UI
+- [x] **分類**：Drizzle schema、`/admin/categories` 列表／新增／編輯 API + UI
 - [x] **商品**：Drizzle schema、`/admin/products` 列表／`new`／`[id]` + `PUT .../catalog`（規格 Drawer）；價格 NUMERIC、後台 id／前台 slug 見 `docs/plan-admin-products-variants.md`
 - [ ] **CMS 頁**：資料表 + Admin `/admin/pages` CRUD；公開路由 ` /p/[page_slug]` 渲染
 - [ ] **收款**：`/admin/settings/payment` 真實欄位、敏感資料加密儲存、僅 server 解密
