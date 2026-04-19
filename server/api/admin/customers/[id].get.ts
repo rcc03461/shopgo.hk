@@ -1,4 +1,4 @@
-import { and, count, eq } from 'drizzle-orm'
+import { and, count, desc, eq } from 'drizzle-orm'
 import { createError } from 'h3'
 import { z } from 'zod'
 import * as schema from '../../../database/schema'
@@ -52,6 +52,25 @@ export default defineEventHandler(async (event) => {
       ),
     )
 
+  const recentOrders = await db
+    .select({
+      id: schema.shopOrders.id,
+      invoicePublicId: schema.shopOrders.invoicePublicId,
+      status: schema.shopOrders.status,
+      currency: schema.shopOrders.currency,
+      total: schema.shopOrders.total,
+      createdAt: schema.shopOrders.createdAt,
+    })
+    .from(schema.shopOrders)
+    .where(
+      and(
+        eq(schema.shopOrders.tenantId, session.tenantId),
+        eq(schema.shopOrders.customerId, customer.id),
+      ),
+    )
+    .orderBy(desc(schema.shopOrders.createdAt), desc(schema.shopOrders.id))
+    .limit(10)
+
   return {
     customer: {
       ...customer,
@@ -61,5 +80,10 @@ export default defineEventHandler(async (event) => {
     stats: {
       totalOrders: Number(orderStats?.totalOrders ?? 0),
     },
+    recentOrders: recentOrders.map((row) => ({
+      ...row,
+      total: String(row.total),
+      createdAt: row.createdAt.toISOString(),
+    })),
   }
 })

@@ -20,6 +20,14 @@ type Detail = {
   stats: {
     totalOrders: number
   }
+  recentOrders: Array<{
+    id: string
+    invoicePublicId: string
+    status: string
+    currency: string
+    total: string
+    createdAt: string
+  }>
 }
 
 const { data, error, refresh } = await useAsyncData(
@@ -50,6 +58,26 @@ function statusPillClass(s: string) {
   if (s === 'active') return 'bg-emerald-50 text-emerald-800 ring-emerald-200'
   if (s === 'disabled') return 'bg-red-50 text-red-800 ring-red-200'
   return 'bg-neutral-100 text-neutral-800 ring-neutral-200'
+}
+
+function orderStatusLabel(s: string) {
+  if (s === 'paid') return '已付款'
+  if (s === 'pending_payment') return '待付款'
+  if (s === 'payment_failed') return '付款失敗'
+  return s
+}
+
+function formatMoney(amount: string, currency: string) {
+  const n = Number(amount)
+  if (Number.isNaN(n)) return amount
+  try {
+    return new Intl.NumberFormat('zh-HK', {
+      style: 'currency',
+      currency: currency || 'HKD',
+    }).format(n)
+  } catch {
+    return `${amount} ${currency}`
+  }
 }
 
 const statusDraft = ref<'active' | 'disabled'>('active')
@@ -206,6 +234,55 @@ async function saveStatus() {
           >
             {{ savingStatus ? '更新中…' : '更新狀態' }}
           </button>
+        </div>
+      </section>
+
+      <section class="mt-8 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
+        <h2 class="text-base font-semibold text-neutral-900">最近 10 筆訂單</h2>
+        <p class="mt-1 text-sm text-neutral-600">
+          顯示此顧客最新建立的訂單，可快速跳轉查看詳情。
+        </p>
+        <div class="mt-4 overflow-x-auto">
+          <table class="min-w-full divide-y divide-neutral-200 text-sm">
+            <thead class="bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <tr>
+                <th class="whitespace-nowrap px-3 py-2">建立時間</th>
+                <th class="whitespace-nowrap px-3 py-2">狀態</th>
+                <th class="whitespace-nowrap px-3 py-2 text-right">總計</th>
+                <th class="whitespace-nowrap px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-200">
+              <tr v-if="!data.recentOrders.length">
+                <td colspan="4" class="px-3 py-4 text-center text-neutral-500">
+                  尚無訂單
+                </td>
+              </tr>
+              <tr
+                v-for="order in data.recentOrders"
+                :key="order.id"
+                class="hover:bg-neutral-50"
+              >
+                <td class="whitespace-nowrap px-3 py-2 text-neutral-700">
+                  {{ formatTime(order.createdAt) }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-2 text-neutral-700">
+                  {{ orderStatusLabel(order.status) }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-2 text-right font-medium text-neutral-900">
+                  {{ formatMoney(order.total, order.currency) }}
+                </td>
+                <td class="whitespace-nowrap px-3 py-2 text-right">
+                  <NuxtLink
+                    :to="`/admin/orders/${order.id}`"
+                    class="text-sm font-medium text-neutral-900 underline-offset-2 hover:underline"
+                  >
+                    查看訂單
+                  </NuxtLink>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </template>

@@ -11,7 +11,7 @@
 - [x] 主站登入／註冊成功 → 導向 `{slug}.{tenantRootDomain}/admin/dashboard`
 - [x] `tenantSlug` middleware（含客戶端 `window.location.host` fallback）
 - [x] `/admin/*` 守門（租戶 host、登入、JWT `shopSlug` 與 host 一致）
-- [x] Admin 殼層頁：dashboard、pages、categories、products、orders、settings、settings/payment
+- [x] Admin 殼層頁：dashboard、pages、categories、products、orders、customers、settings、settings/payment
 - [x] 租戶子網域首頁簡版（與主站 Landing 分流）
 - [x] 前台購物流程：`/products`、`/products/[product_slug]`、`/cart`、`/payment`、`/payment/complete`
 
@@ -23,6 +23,7 @@
 - [x] **分類**：Drizzle schema、`/admin/categories` 列表／新增／編輯 API + UI
 - [x] **商品**：Drizzle schema、`/admin/products` 列表／`new`／`[id]` + `PUT .../catalog`（規格 Drawer）；價格 NUMERIC、後台 id／前台 slug 見 `docs/plan-admin-products-variants.md`
 - [x] **訂單（後台）**：`/admin/orders` 列表與 `/admin/orders/[id]` 詳情 API + UI
+- [x] **顧客（後台）**：`/admin/customers` 列表、`/admin/customers/[id]` 詳情、狀態更新（active/disabled）
 - [ ] **CMS 頁**：資料表 + Admin `/admin/pages` CRUD；公開路由 ` /p/[page_slug]` 渲染
 - [x] **收款**：`/admin/settings/payment` 真實欄位、敏感資料加密儲存、僅 server 解密
 
