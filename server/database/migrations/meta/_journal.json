@@ -8,6 +8,13 @@
       "when": 1776584929576,
       "tag": "0000_jittery_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776591343357,
+      "tag": "0001_rare_colossus",
+      "breakpoints": true
     }
   ]
 }

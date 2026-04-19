@@ -16,7 +16,7 @@ export function walkErrorCauseChain(err: unknown): unknown[] {
   return out
 }
 
-function getPgSqlState(err: unknown): string | undefined {
+export function getPgSqlState(err: unknown): string | undefined {
   for (const x of walkErrorCauseChain(err)) {
     if (typeof x !== 'object' || x === null) continue
     const code = (x as { code?: unknown }).code
