@@ -14,6 +14,9 @@ export async function requireStoreCustomerSession(event: H3Event) {
 
   const tenant = await requireTenantStoreContext(event)
   const session = await verifyCustomerSessionToken(event, token)
+  if (!tenant.tenantId || !tenant.shopSlug) {
+    throw createError({ statusCode: 401, message: '商店識別資訊無效，請重新登入' })
+  }
   if (session.tenantId !== tenant.tenantId || session.shopSlug !== tenant.shopSlug) {
     throw createError({ statusCode: 403, message: '登入狀態與商店網域不符' })
   }
