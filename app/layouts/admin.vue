@@ -9,7 +9,6 @@ const nav = [
   { to: '/admin/orders', label: '訂單' },
   { to: '/admin/customers', label: '顧客' },
   { to: '/admin/settings', label: '設定' },
-  { to: '/admin/settings/payment', label: '收款' },
 ]
 </script>
 

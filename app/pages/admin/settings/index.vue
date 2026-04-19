@@ -14,6 +14,7 @@ type SettingsResponse = {
 
 const requestFetch = useRequestFetch()
 const { uploadImageFile } = useAdminAttachments()
+const route = useRoute()
 
 const { data, refresh, error } = await useAsyncData(
   'admin-tenant-settings',
@@ -183,6 +184,13 @@ function buildSettings(): TenantSettingsPayload {
 const saving = ref(false)
 const saveErr = ref<string | null>(null)
 
+function tabClass(path: string): string {
+  const active = route.path === path
+  return active
+    ? 'rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white'
+    : 'rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
+}
+
 async function save() {
   saving.value = true
   saveErr.value = null
@@ -203,8 +211,8 @@ async function save() {
 </script>
 
 <template>
-  <div class="max-w-2xl">
-    <div class="flex flex-wrap items-start justify-between gap-3">
+  <div class="max-w-4xl">
+    <div class="space-y-4">
       <div>
         <h1 class="text-xl font-semibold tracking-tight">商店設定</h1>
         <p class="mt-2 text-sm text-neutral-600">
@@ -219,12 +227,21 @@ async function save() {
           （網址代號如需修改請另洽平台流程）
         </p>
       </div>
-      <NuxtLink
-        to="/admin/settings/payment"
-        class="shrink-0 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-800 hover:bg-neutral-50"
-      >
-        收款設定
-      </NuxtLink>
+
+      <div class="flex flex-wrap items-center gap-2 border-b border-neutral-200 pb-3">
+        <NuxtLink
+          to="/admin/settings"
+          :class="tabClass('/admin/settings')"
+        >
+          商店設定
+        </NuxtLink>
+        <NuxtLink
+          to="/admin/settings/payment"
+          :class="tabClass('/admin/settings/payment')"
+        >
+          收款設定
+        </NuxtLink>
+      </div>
     </div>
 
     <p
@@ -234,11 +251,7 @@ async function save() {
       無法載入設定。
     </p>
 
-    <form
-      v-else
-      class="mt-8 space-y-10"
-      @submit.prevent="save"
-    >
+    <form v-else class="mt-8 space-y-6" @submit.prevent="save">
       <p
         v-if="saveErr"
         class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
@@ -247,7 +260,7 @@ async function save() {
       </p>
 
       <!-- 品牌 -->
-      <section class="space-y-4">
+      <section class="rounded-lg border border-neutral-200 bg-white p-5 space-y-4 shadow-sm">
         <h2 class="text-sm font-semibold text-neutral-900">
           品牌與文案
         </h2>
@@ -274,7 +287,7 @@ async function save() {
       </section>
 
       <!-- Logo / Favicon -->
-      <section class="space-y-4">
+      <section class="rounded-lg border border-neutral-200 bg-white p-5 space-y-4 shadow-sm">
         <h2 class="text-sm font-semibold text-neutral-900">
           視覺識別
         </h2>
@@ -379,7 +392,7 @@ async function save() {
       </section>
 
       <!-- 聯絡 -->
-      <section class="space-y-4">
+      <section class="rounded-lg border border-neutral-200 bg-white p-5 space-y-4 shadow-sm">
         <h2 class="text-sm font-semibold text-neutral-900">
           聯絡與地址
         </h2>
@@ -411,54 +424,53 @@ async function save() {
       </section>
 
       <!-- 社群 -->
-      <section class="space-y-4">
+      <section class="rounded-lg border border-neutral-200 bg-white p-5 space-y-4 shadow-sm">
         <h2 class="text-sm font-semibold text-neutral-900">
           社群與網站
         </h2>
         <p class="text-xs text-neutral-500">
-          請填完整 https 網址；留空則前台不顯示該項。
+          請填完整 https 網址；留空時前台不顯示。可先只填「官方網站」。
         </p>
-        <AdminFormTextInput
-          v-model="form.socialWebsite"
-          label="官方網站"
-        />
-        <AdminFormTextInput
-          v-model="form.socialInstagram"
-          label="Instagram"
-        />
-        <AdminFormTextInput
-          v-model="form.socialFacebook"
-          label="Facebook"
-        />
-        <AdminFormTextInput
-          v-model="form.socialYoutube"
-          label="YouTube"
-        />
-        <AdminFormTextInput
-          v-model="form.socialTiktok"
-          label="TikTok"
-        />
-        <AdminFormTextInput
-          v-model="form.socialX"
-          label="X（Twitter）"
-        />
-        <AdminFormTextInput
-          v-model="form.socialThreads"
-          label="Threads"
-        />
-        <AdminFormTextInput
-          v-model="form.socialLine"
-          label="LINE"
-        />
-        <AdminFormTextInput
-          v-model="form.socialWhatsapp"
-          label="WhatsApp"
-          hint="建議使用 https://wa.me/852xxxxxxxx 形式"
-        />
+        <AdminFormTextInput v-model="form.socialWebsite" label="官方網站" />
+        <div class="grid gap-4 sm:grid-cols-2">
+          <AdminFormTextInput
+            v-model="form.socialInstagram"
+            label="Instagram"
+          />
+          <AdminFormTextInput
+            v-model="form.socialFacebook"
+            label="Facebook"
+          />
+          <AdminFormTextInput
+            v-model="form.socialYoutube"
+            label="YouTube"
+          />
+          <AdminFormTextInput
+            v-model="form.socialTiktok"
+            label="TikTok"
+          />
+          <AdminFormTextInput
+            v-model="form.socialX"
+            label="X（Twitter）"
+          />
+          <AdminFormTextInput
+            v-model="form.socialThreads"
+            label="Threads"
+          />
+          <AdminFormTextInput
+            v-model="form.socialLine"
+            label="LINE"
+          />
+          <AdminFormTextInput
+            v-model="form.socialWhatsapp"
+            label="WhatsApp"
+            hint="建議使用 https://wa.me/852xxxxxxxx 形式"
+          />
+        </div>
       </section>
 
       <!-- 頁尾 -->
-      <section class="space-y-4">
+      <section class="rounded-lg border border-neutral-200 bg-white p-5 space-y-4 shadow-sm">
         <h2 class="text-sm font-semibold text-neutral-900">
           頁尾
         </h2>

@@ -34,6 +34,7 @@ type PaymentProvidersResponse = {
 }
 
 const requestFetch = useRequestFetch()
+const route = useRoute()
 
 const { data, refresh, error, pending } = await useAsyncData(
   'admin-payment-providers',
@@ -103,6 +104,13 @@ const saving = ref(false)
 const saveErr = ref<string | null>(null)
 const saveOk = ref(false)
 
+function tabClass(path: string): string {
+  const active = route.path === path
+  return active
+    ? 'rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white'
+    : 'rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
+}
+
 async function saveAll() {
   saving.value = true
   saveErr.value = null
@@ -160,20 +168,28 @@ async function saveAll() {
 
 <template>
   <div class="max-w-3xl space-y-8">
-    <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="space-y-4">
       <div>
-        <NuxtLink
-          to="/admin/settings"
-          class="text-sm text-neutral-500 hover:text-neutral-800"
-        >
-          ← 返回商店設定
-        </NuxtLink>
-        <h1 class="mt-2 text-xl font-semibold tracking-tight">收款設定</h1>
+        <h1 class="text-xl font-semibold tracking-tight">收款設定</h1>
         <p class="mt-2 text-sm text-neutral-600">
           設定 Stripe 與 PayPal（Express／Orders API）憑證。密鑰僅伺服器可解密儲存；正式環境請設定
           <code class="rounded bg-neutral-100 px-1 font-mono text-xs">PAYMENT_SECRETS_KEY</code>
           （32 bytes base64）。
         </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 border-b border-neutral-200 pb-3">
+        <NuxtLink
+          to="/admin/settings"
+          :class="tabClass('/admin/settings')"
+        >
+          商店設定
+        </NuxtLink>
+        <NuxtLink
+          to="/admin/settings/payment"
+          :class="tabClass('/admin/settings/payment')"
+        >
+          收款設定
+        </NuxtLink>
       </div>
     </div>
 
