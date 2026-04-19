@@ -2,7 +2,8 @@ import bcrypt from 'bcryptjs'
 import { eq } from 'drizzle-orm'
 import { isError } from 'h3'
 import * as schema from '../../database/schema'
-import { AUTH_COOKIE, signSessionToken } from '../../utils/authJwt'
+import { signSessionToken } from '../../utils/authJwt'
+import { setAuthSessionCookie } from '../../utils/authCookie'
 import {
   summarizeDbErrorForLog,
   throwIfHandledRegisterDbError,
@@ -58,13 +59,7 @@ export default defineEventHandler(async (event) => {
       shopSlug: result.tenant.shopSlug,
     })
 
-    setCookie(event, AUTH_COOKIE, token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7,
-    })
+    setAuthSessionCookie(event, token)
 
     return {
       ok: true as const,

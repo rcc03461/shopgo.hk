@@ -3,18 +3,33 @@ definePageMeta({
   layout: 'default',
 })
 
+const tenantSlug = useState<string | null>('oshop-tenant-slug')
+const config = useRuntimeConfig()
+
+/** 開店註冊僅在主網域提供，避免在子網域誤開第二間店 */
+if (tenantSlug.value) {
+  const url = useRequestURL()
+  const root = config.public.tenantRootDomain as string
+  const port = url.port ? `:${url.port}` : ''
+  await navigateTo(`${url.protocol}//${root}${port}/register`, {
+    external: true,
+  })
+}
+
 const shopSlug = ref('')
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
-const { refresh } = useAuth()
-
 async function onSubmit() {
   errorMessage.value = null
   loading.value = true
   try {
-    await $fetch('/api/auth/register', {
+    const res = await $fetch<{
+      ok: true
+      tenant: { shopSlug: string }
+      user: { email: string }
+    }>('/api/auth/register', {
       method: 'POST',
       body: {
         shopSlug: shopSlug.value.trim().toLowerCase(),
@@ -22,8 +37,9 @@ async function onSubmit() {
         password: password.value,
       },
     })
-    await refresh()
-    await navigateTo('/')
+
+    const adminUrl = useTenantAdminEntryUrl(res.tenant.shopSlug)
+    await navigateTo(adminUrl, { external: true })
   } catch (e: unknown) {
     const err = e as {
       data?: { message?: string }
@@ -118,7 +134,7 @@ async function onSubmit() {
       </button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-neutral-600">
+    <p v-if="!tenantSlug" class="mt-6 text-center text-sm text-neutral-600">
       已經有帳號？
       <NuxtLink to="/login" class="font-medium text-neutral-900 underline">
         登入

@@ -1,9 +1,19 @@
 <script setup lang="ts">
 const { user, refresh, logout } = useAuth()
+const tenantSlug = useState<string | null>('oshop-tenant-slug')
+
+const adminEntry = computed(() =>
+  user.value ? useTenantAdminEntryUrl(user.value.shopSlug) : '',
+)
 
 onMounted(() => {
   void refresh()
 })
+
+async function handleLogout() {
+  await logout()
+  await navigateTo('/')
+}
 </script>
 
 <template>
@@ -15,17 +25,32 @@ onMounted(() => {
         <NuxtLink to="/" class="text-sm font-semibold tracking-tight">
           OShop
         </NuxtLink>
-        <nav class="flex items-center gap-3 text-sm">
+        <nav class="flex flex-wrap items-center gap-3 text-sm">
           <template v-if="user">
             <span class="hidden text-neutral-600 sm:inline">
               {{ user.email }}
             </span>
             <span class="text-neutral-500">·</span>
             <span class="text-neutral-600">{{ user.shopSlug }}</span>
+            <NuxtLink
+              v-if="tenantSlug && user.shopSlug === tenantSlug"
+              to="/admin/dashboard"
+              class="rounded-md border border-neutral-200 px-3 py-1.5 font-medium text-neutral-800 hover:bg-neutral-50"
+            >
+              後台
+            </NuxtLink>
+            <NuxtLink
+              v-else-if="!tenantSlug"
+              :to="adminEntry"
+              external
+              class="rounded-md border border-neutral-200 px-3 py-1.5 font-medium text-neutral-800 hover:bg-neutral-50"
+            >
+              商店後台
+            </NuxtLink>
             <button
               type="button"
               class="rounded-md border border-neutral-300 px-3 py-1.5 font-medium text-neutral-800 hover:bg-neutral-50"
-              @click="logout().then(() => navigateTo('/'))"
+              @click="handleLogout"
             >
               登出
             </button>

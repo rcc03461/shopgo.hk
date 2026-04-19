@@ -1,6 +1,6 @@
-import { AUTH_COOKIE } from '../../utils/authJwt'
+import { clearAuthSessionCookie } from '../../utils/authCookie'
 
 export default defineEventHandler(async (event) => {
-  deleteCookie(event, AUTH_COOKIE, { path: '/' })
+  clearAuthSessionCookie(event)
   return { ok: true as const }
 })

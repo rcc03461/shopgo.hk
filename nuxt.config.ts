@@ -15,6 +15,14 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    public: {
+      /** 租戶子網域根（Cookie Domain 與導向網址用） */
+      tenantRootDomain:
+        process.env.NUXT_PUBLIC_TENANT_ROOT_DOMAIN || 'oshop.com.hk',
+      /** 登入／註冊後預設後台路徑 */
+      adminDefaultPath:
+        process.env.NUXT_PUBLIC_ADMIN_DEFAULT_PATH || '/admin/dashboard',
+    },
     databaseUrl: process.env.DATABASE_URL || '',
     dbHost: process.env.db_host || process.env.DB_HOST || '',
     dbUser: process.env.db_user || process.env.DB_USER || '',

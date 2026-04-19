@@ -3,22 +3,37 @@ definePageMeta({
   layout: 'default',
 })
 
+const route = useRoute()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
-const { refresh } = useAuth()
+const tenantSlug = useState<string | null>('oshop-tenant-slug')
 
 async function onSubmit() {
   errorMessage.value = null
   loading.value = true
   try {
-    await $fetch('/api/auth/login', {
+    const res = await $fetch<{
+      ok: true
+      tenant: { shopSlug: string }
+      user: { email: string }
+    }>('/api/auth/login', {
       method: 'POST',
       body: { email: email.value, password: password.value },
     })
-    await refresh()
-    await navigateTo('/')
+
+    if (tenantSlug.value) {
+      const redirect =
+        typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
+          ? route.query.redirect
+          : '/admin/dashboard'
+      await navigateTo(redirect)
+      return
+    }
+
+    const adminUrl = useTenantAdminEntryUrl(res.tenant.shopSlug)
+    await navigateTo(adminUrl, { external: true })
   } catch (e: unknown) {
     const err = e as {
       data?: { message?: string }
@@ -42,7 +57,12 @@ async function onSubmit() {
       登入
     </h1>
     <p class="mt-2 text-sm text-neutral-600">
-      使用註冊時的電子郵件與密碼登入平台。
+      <template v-if="tenantSlug">
+        登入 <span class="font-mono">{{ tenantSlug }}</span> 商店管理帳號。
+      </template>
+      <template v-else>
+        使用註冊時的電子郵件與密碼登入；成功後將前往該商店的後台總覽。
+      </template>
     </p>
 
     <form class="mt-8 space-y-4" @submit.prevent="onSubmit">
@@ -89,7 +109,7 @@ async function onSubmit() {
       </button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-neutral-600">
+    <p v-if="!tenantSlug" class="mt-6 text-center text-sm text-neutral-600">
       還沒有帳號？
       <NuxtLink to="/register" class="font-medium text-neutral-900 underline">
         前往註冊
