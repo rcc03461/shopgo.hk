@@ -68,7 +68,7 @@ bun run dev -- --host oshop.com.hk
 複製 `.env.example` 為 `.env`，並至少設定：
 
 - 資料庫：`DATABASE_URL` **或** `db_host` / `db_user` / `db_password` / `db_name`（可選 `db_port`、`DB_SSLMODE`）
-- `JWT_SECRET`：請用長隨機字串；用於登入後 HTTP-only Cookie 內的 JWT 簽章
+- `JWT_SECRET`：正式環境請用長隨機字串；開發環境可不填（會使用內建預設值，**勿用於正式站**）。部署時亦可使用 `NUXT_JWT_SECRET` 覆寫。
 
 ### 資料庫 migration
 

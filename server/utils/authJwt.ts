@@ -12,14 +12,20 @@ export type SessionPayload = {
 }
 
 function getSecret(event: H3Event) {
-  const secret = useRuntimeConfig(event).jwtSecret as string
-  if (!secret?.trim()) {
+  const fromConfig = useRuntimeConfig(event).jwtSecret as string | undefined
+  const secret =
+    fromConfig?.trim() ||
+    process.env.JWT_SECRET?.trim() ||
+    process.env.NUXT_JWT_SECRET?.trim() ||
+    ''
+  if (!secret) {
     throw createError({
       statusCode: 500,
-      message: '伺服器未設定 JWT_SECRET',
+      message:
+        '伺服器未設定 JWT_SECRET：請在 .env 設定後重新啟動；正式環境亦可使用 NUXT_JWT_SECRET',
     })
   }
-  return new TextEncoder().encode(secret.trim())
+  return new TextEncoder().encode(secret)
 }
 
 export async function signSessionToken(

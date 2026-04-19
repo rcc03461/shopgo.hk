@@ -1,7 +1,12 @@
 import bcrypt from 'bcryptjs'
 import { eq } from 'drizzle-orm'
+import { isError } from 'h3'
 import * as schema from '../../database/schema'
 import { AUTH_COOKIE, signSessionToken } from '../../utils/authJwt'
+import {
+  summarizeDbErrorForLog,
+  throwIfHandledRegisterDbError,
+} from '../../utils/dbErrors'
 import { getDb } from '../../utils/db'
 import { registerBodySchema } from '../../utils/schemas'
 
@@ -67,26 +72,19 @@ export default defineEventHandler(async (event) => {
       user: { email: normalizedEmail },
     }
   } catch (e: unknown) {
-    if (isPostgresUniqueViolation(e)) {
-      const slugTaken = await db
-        .select({ id: schema.tenants.id })
-        .from(schema.tenants)
-        .where(eq(schema.tenants.shopSlug, shopSlug))
-        .limit(1)
-      if (slugTaken.length) {
-        throw createError({ statusCode: 409, message: '此商店代號已被使用' })
-      }
-      throw createError({ statusCode: 409, message: '此電子郵件已被註冊' })
+    if (!isError(e)) {
+      console.error('[auth/register]', summarizeDbErrorForLog(e))
     }
-    throw e
+    await throwIfHandledRegisterDbError(e, {
+      shopSlug,
+      isSlugTaken: async () => {
+        const slugTaken = await db
+          .select({ id: schema.tenants.id })
+          .from(schema.tenants)
+          .where(eq(schema.tenants.shopSlug, shopSlug))
+          .limit(1)
+        return slugTaken.length > 0
+      },
+    })
   }
 })
-
-function isPostgresUniqueViolation(e: unknown): boolean {
-  return (
-    typeof e === 'object' &&
-    e !== null &&
-    'code' in e &&
-    (e as { code?: string }).code === '23505'
-  )
-}
