@@ -294,3 +294,56 @@ export const variantOptionValues = pgTable(
     index('variant_option_values_variant_id_idx').on(t.productVariantId),
   ],
 )
+
+/** 租戶前台訂單（付款前即建立，`invoice_public_id` 供日後發票 URL） */
+export const shopOrders = pgTable(
+  'shop_orders',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    invoicePublicId: uuid('invoice_public_id').notNull().defaultRandom(),
+    status: varchar('status', { length: 32 }).notNull().default('pending_payment'),
+    paymentProvider: varchar('payment_provider', { length: 32 }),
+    paymentReference: text('payment_reference'),
+    currency: varchar('currency', { length: 8 }).notNull().default('HKD'),
+    subtotal: numeric('subtotal', { precision: 14, scale: 4 }).notNull(),
+    total: numeric('total', { precision: 14, scale: 4 }).notNull(),
+    customerEmail: varchar('customer_email', { length: 255 }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex('shop_orders_invoice_public_id_uidx').on(t.invoicePublicId),
+    index('shop_orders_tenant_id_idx').on(t.tenantId),
+    index('shop_orders_tenant_status_idx').on(t.tenantId, t.status),
+  ],
+)
+
+export const shopOrderLines = pgTable(
+  'shop_order_lines',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => shopOrders.id, { onDelete: 'cascade' }),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'restrict' }),
+    productVariantId: uuid('product_variant_id').references(
+      () => productVariants.id,
+      { onDelete: 'restrict' },
+    ),
+    titleSnapshot: varchar('title_snapshot', { length: 255 }).notNull(),
+    skuSnapshot: varchar('sku_snapshot', { length: 128 }).notNull(),
+    unitPrice: numeric('unit_price', { precision: 14, scale: 4 }).notNull(),
+    quantity: integer('quantity').notNull(),
+    lineTotal: numeric('line_total', { precision: 14, scale: 4 }).notNull(),
+  },
+  (t) => [index('shop_order_lines_order_id_idx').on(t.orderId)],
+)

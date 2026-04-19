@@ -19,8 +19,14 @@ const tenantSlug = useState<string | null>('oshop-tenant-slug')
     </p>
     <div class="mt-8 flex flex-wrap gap-3">
       <NuxtLink
-        to="/admin/dashboard"
+        to="/products"
         class="inline-flex rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+      >
+        瀏覽商品
+      </NuxtLink>
+      <NuxtLink
+        to="/admin/dashboard"
+        class="inline-flex rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
       >
         進入後台
       </NuxtLink>

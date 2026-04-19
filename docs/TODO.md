@@ -22,20 +22,20 @@
 - [x] **分類**：Drizzle schema、`/admin/categories` 列表／新增／編輯 API + UI
 - [x] **商品**：Drizzle schema、`/admin/products` 列表／`new`／`[id]` + `PUT .../catalog`（規格 Drawer）；價格 NUMERIC、後台 id／前台 slug 見 `docs/plan-admin-products-variants.md`
 - [ ] **CMS 頁**：資料表 + Admin `/admin/pages` CRUD；公開路由 ` /p/[page_slug]` 渲染
-- [ ] **收款**：`/admin/settings/payment` 真實欄位、敏感資料加密儲存、僅 server 解密
+- [x] **收款**：`/admin/settings/payment` 真實欄位、敏感資料加密儲存、僅 server 解密
 
 ---
 
 ## 租戶前台（README「租戶子站」路由）
 
 - [ ] `/register`、`/login`（子網域會員；與平台帳號策略釐清後實作）
-- [ ] `/products`（左欄篩選 + 右欄列表）
-- [ ] `/products/[product_slug]` 商品詳情
-- [ ] `/cart` 購物車
-- [ ] `/payment` 付款流程
-- [ ] `/invoices/[invoice_uuid]` 發票／訂單明細
+- [x] `/products`（左欄篩選 + 右欄列表）
+- [x] `/products/[product_slug]` 商品詳情
+- [x] `/cart` 購物車
+- [x] `/payment` 付款流程
+- [ ] `/orders/[order_uuid]` 發票／訂單明細
 - [ ] `/tnc` 條款（可租戶自訂內容）
-- [ ] `/profile`、`/profile/invoices`、`/profile/invoices/[invoice_uuid]` 會員中心
+- [ ] `/profile`、`/profile/orders`、`/profile/orders/[order_uuid]` 會員中心
 
 ---
 

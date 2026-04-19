@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { user, refresh, logout } = useAuth()
 const tenantSlug = useState<string | null>('oshop-tenant-slug')
+const { totalQty } = useStoreCart()
 
 const adminEntry = computed(() =>
   user.value ? useTenantAdminEntryUrl(user.value.shopSlug) : '',
@@ -26,6 +27,26 @@ async function handleLogout() {
           OShop
         </NuxtLink>
         <nav class="flex flex-wrap items-center gap-3 text-sm">
+          <NuxtLink
+            v-if="tenantSlug"
+            to="/products"
+            class="rounded-md px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50"
+          >
+            商品
+          </NuxtLink>
+          <NuxtLink
+            v-if="tenantSlug"
+            to="/cart"
+            class="relative rounded-md px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50"
+          >
+            購物車
+            <span
+              v-if="totalQty > 0"
+              class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-neutral-900 px-1 text-[10px] font-semibold leading-none text-white"
+            >
+              {{ totalQty > 99 ? '99+' : totalQty }}
+            </span>
+          </NuxtLink>
           <template v-if="user">
             <span class="hidden text-neutral-600 sm:inline">
               {{ user.email }}
