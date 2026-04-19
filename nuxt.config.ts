@@ -36,5 +36,7 @@ export default defineNuxtConfig({
       (process.env.NODE_ENV === 'production'
         ? ''
         : 'dev-only-oshop-jwt-secret'),
+    /** 32 bytes base64；加密儲存 Stripe / PayPal 密鑰用（正式環境建議設定） */
+    paymentSecretsKey: (process.env.PAYMENT_SECRETS_KEY || '').trim(),
   },
 })

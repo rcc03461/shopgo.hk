@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import {
   bigint,
+  boolean,
   index,
   integer,
   jsonb,
@@ -29,6 +30,42 @@ export const tenants = pgTable('tenants', {
     .defaultNow()
     .notNull(),
 })
+
+/** 租戶金流渠道（Stripe、PayPal 等）；敏感欄位見 secrets_encrypted */
+export type TenantPaymentProviderConfigJson = Record<string, unknown>
+
+export const tenantPaymentProviders = pgTable(
+  'tenant_payment_providers',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    /** 渠道代碼：stripe、paypal（日後可擴充 alipay 等） */
+    provider: varchar('provider', { length: 32 }).notNull(),
+    enabled: boolean('enabled').notNull().default(false),
+    displayOrder: integer('display_order').notNull().default(0),
+    config: jsonb('config')
+      .$type<TenantPaymentProviderConfigJson>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    /** AES-256-GCM 加密後的 JSON（僅伺服器解密） */
+    secretsEncrypted: text('secrets_encrypted'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex('tenant_payment_providers_tenant_provider_uidx').on(
+      t.tenantId,
+      t.provider,
+    ),
+    index('tenant_payment_providers_tenant_id_idx').on(t.tenantId),
+  ],
+)
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
