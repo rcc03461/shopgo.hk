@@ -12,6 +12,34 @@ export const storeCheckoutBodySchema = z.object({
     .union([z.string().email(), z.literal('')])
     .optional()
     .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+  shipping: z
+    .object({
+      method: z
+        .union([z.string().max(64), z.literal('')])
+        .optional()
+        .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+      name: z
+        .union([z.string().max(120), z.literal('')])
+        .optional()
+        .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+      email: z
+        .union([z.string().email(), z.literal('')])
+        .optional()
+        .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+      phone: z
+        .union([z.string().max(64), z.literal('')])
+        .optional()
+        .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+      address: z
+        .union([z.string().max(2000), z.literal('')])
+        .optional()
+        .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+      remarks: z
+        .union([z.string().max(2000), z.literal('')])
+        .optional()
+        .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+    })
+    .optional(),
   items: z.array(storeCheckoutItemSchema).min(1).max(50),
 })
 

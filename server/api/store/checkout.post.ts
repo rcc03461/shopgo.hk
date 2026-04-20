@@ -56,7 +56,9 @@ export default defineEventHandler(async (event) => {
       currency: 'HKD',
       subtotal,
       total,
-      customerEmail: input.customerEmail ?? customerSession?.email ?? null,
+      customerEmail:
+        input.customerEmail ?? input.shipping?.email ?? customerSession?.email ?? null,
+      shippingData: input.shipping ?? null,
     })
     .returning()
 

@@ -17,6 +17,7 @@ import {
 
 /** 商店前台／後台設定（不需單獨索引搜尋的欄位集中於此 JSON） */
 export type TenantSettingsJson = Record<string, unknown>
+export type ShopOrderShippingDataJson = Record<string, unknown>
 
 export const tenants = pgTable('tenants', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -413,6 +414,7 @@ export const shopOrders = pgTable(
     subtotal: numeric('subtotal', { precision: 14, scale: 4 }).notNull(),
     total: numeric('total', { precision: 14, scale: 4 }).notNull(),
     customerEmail: varchar('customer_email', { length: 255 }),
+    shippingData: jsonb('shipping_data').$type<ShopOrderShippingDataJson>(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

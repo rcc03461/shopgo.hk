@@ -50,7 +50,8 @@ const form = reactive({
 })
 
 /** 與 PATCH body 的 settings 欄位對齊（見 server/utils/tenantSettingsSchemas） */
-type TenantSettingsPayload = Record<string, string | null | undefined>
+type TenantSettingsPayload = Record<string, unknown>
+const originalSettings = ref<Record<string, unknown>>({})
 
 function str(v: unknown): string {
   return typeof v === 'string' ? v : ''
@@ -69,6 +70,7 @@ watch(
   (v) => {
     if (!v) return
     const s = v.settings ?? {}
+    originalSettings.value = { ...s }
     form.displayName = str(s.displayName)
     form.tagline = str(s.tagline)
     form.description = str(s.description)
@@ -157,6 +159,7 @@ function optionalTrim(s: string): string | undefined {
 
 function buildSettings(): TenantSettingsPayload {
   return {
+    ...originalSettings.value,
     displayName: optionalTrim(form.displayName),
     tagline: optionalTrim(form.tagline),
     description: optionalTrim(form.description),
@@ -240,6 +243,12 @@ async function save() {
           :class="tabClass('/admin/settings/payment')"
         >
           收款設定
+        </NuxtLink>
+        <NuxtLink
+          to="/admin/settings/shipping"
+          :class="tabClass('/admin/settings/shipping')"
+        >
+          運送設定
         </NuxtLink>
       </div>
     </div>

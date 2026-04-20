@@ -28,6 +28,7 @@ type Detail = {
     subtotal: string
     total: string
     customerEmail: string | null
+    shippingData: Record<string, unknown> | null
     createdAt: string
     updatedAt: string
   }
@@ -86,6 +87,10 @@ function providerLabel(p: string | null) {
   if (p === 'stripe') return 'Stripe'
   if (p === 'paypal') return 'PayPal'
   return p
+}
+
+function shippingField(v: unknown) {
+  return typeof v === 'string' && v.trim() ? v.trim() : '—'
 }
 
 const statusDraft = ref<'pending_payment' | 'paid' | 'payment_failed'>(
@@ -229,6 +234,65 @@ async function saveStatus() {
           </dd>
         </div>
       </dl>
+
+      <section
+        v-if="data.order.shippingData"
+        class="mt-8 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm"
+      >
+        <h2 class="text-base font-semibold text-neutral-900">
+          運送資料
+        </h2>
+        <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              運送方式
+            </dt>
+            <dd class="mt-1 text-sm text-neutral-900">
+              {{ shippingField(data.order.shippingData.method) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              收件人
+            </dt>
+            <dd class="mt-1 text-sm text-neutral-900">
+              {{ shippingField(data.order.shippingData.name) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              運送 Email
+            </dt>
+            <dd class="mt-1 text-sm text-neutral-900">
+              {{ shippingField(data.order.shippingData.email) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              電話
+            </dt>
+            <dd class="mt-1 text-sm text-neutral-900">
+              {{ shippingField(data.order.shippingData.phone) }}
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              地址
+            </dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-neutral-900">
+              {{ shippingField(data.order.shippingData.address) }}
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-xs font-medium uppercase tracking-wide text-neutral-500">
+              備註
+            </dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-neutral-900">
+              {{ shippingField(data.order.shippingData.remarks) }}
+            </dd>
+          </div>
+        </dl>
+      </section>
 
       <section class="mt-8 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 class="text-base font-semibold text-neutral-900">

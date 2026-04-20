@@ -52,6 +52,10 @@ export default defineEventHandler(async (event) => {
       subtotal: String(order.subtotal),
       total: String(order.total),
       customerEmail: order.customerEmail,
+      shippingData:
+        order.shippingData && typeof order.shippingData === 'object'
+          ? (order.shippingData as Record<string, unknown>)
+          : null,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
     },

@@ -39,6 +39,23 @@ const optionalTrimmed = (max: number) =>
 
 const attachmentIdNullable = z.union([z.string().uuid(), z.null()]).optional()
 
+const shippingMethodSchema = z
+  .string()
+  .max(64, '運送方式最多 64 字')
+  .transform((s) => s.trim())
+  .refine((s) => s.length > 0, '運送方式不可空白')
+
+const shippingFormSchema = z
+  .object({
+    name: z.boolean().optional(),
+    email: z.boolean().optional(),
+    phone: z.boolean().optional(),
+    address: z.boolean().optional(),
+    remarks: z.boolean().optional(),
+  })
+  .strict()
+  .optional()
+
 /**
  * 寫入 `tenants.settings` 的 JSON 形狀（欄位皆可選，整份物件由 PATCH 整體取代）
  */
@@ -70,6 +87,8 @@ export const tenantStoredSettingsSchema = z
     socialWhatsapp: optionalHttpUrl(),
     socialThreads: optionalHttpUrl(),
     socialWebsite: optionalHttpUrl(),
+    shippingMethods: z.array(shippingMethodSchema).max(20).optional(),
+    shippingForm: shippingFormSchema,
   })
   .strict()
 

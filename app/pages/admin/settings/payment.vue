@@ -190,6 +190,12 @@ async function saveAll() {
         >
           收款設定
         </NuxtLink>
+        <NuxtLink
+          to="/admin/settings/shipping"
+          :class="tabClass('/admin/settings/shipping')"
+        >
+          運送設定
+        </NuxtLink>
       </div>
     </div>
 
