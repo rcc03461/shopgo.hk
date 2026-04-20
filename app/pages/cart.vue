@@ -7,6 +7,7 @@ definePageMeta({
 
 const tenantSlug = useState<string | null>('oshop-tenant-slug')
 const { lines, setQty, removeLine, subtotalMoney, totalQty } = useStoreCart()
+const hasInvalidLines = computed(() => lines.value.some((l) => l.isValid === false))
 </script>
 
 <template>
@@ -57,6 +58,12 @@ const { lines, setQty, removeLine, subtotalMoney, totalQty } = useStoreCart()
             <p class="mt-1 font-mono text-xs text-neutral-500">
               {{ formatHkd(line.unitPrice) }} × {{ line.qty }}
             </p>
+            <p
+              v-if="line.isValid === false && line.validationMessage"
+              class="mt-2 text-xs text-red-600"
+            >
+              {{ line.validationMessage }}
+            </p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
             <label class="flex items-center gap-2 text-sm text-neutral-600">
@@ -105,12 +112,20 @@ const { lines, setQty, removeLine, subtotalMoney, totalQty } = useStoreCart()
       </div>
 
       <div v-if="lines.length > 0" class="mt-8">
-        <NuxtLink
-          to="/payment"
-          class="inline-flex w-full items-center justify-center rounded-md bg-neutral-900 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-800 sm:w-auto"
+        <p
+          v-if="hasInvalidLines"
+          class="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          購物車內有失效項目，請先調整或移除後再前往付款。
+        </p>
+        <button
+          type="button"
+          class="inline-flex w-full items-center justify-center rounded-md bg-neutral-900 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+          :disabled="hasInvalidLines"
+          @click="navigateTo('/payment')"
         >
           前往付款
-        </NuxtLink>
+        </button>
       </div>
     </template>
   </div>

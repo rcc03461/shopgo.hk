@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useAdminAttachments } from '~/composables/useAdminAttachments'
+
 type CatalogOptionValue = { value: string; sortOrder: number }
 type CatalogOption = {
   name: string
@@ -31,6 +33,9 @@ const catalog = defineModel<{ options: CatalogOption[]; variants: CatalogVariant
 const dialogRef = ref<HTMLDialogElement | null>(null)
 const saving = ref(false)
 const errorMsg = ref<string | null>(null)
+const uploadErrorMsg = ref<string | null>(null)
+const uploadingVariant = ref<Record<number, boolean>>({})
+const { uploadImageFile } = useAdminAttachments()
 
 watch(open, (v) => {
   nextTick(() => {
@@ -97,6 +102,28 @@ function removeVariant(index: number) {
   catalog.value.variants.splice(index, 1)
 }
 
+function variantUploadInputId(index: number) {
+  return `variant-upload-${index}`
+}
+
+async function onVariantImageUpload(variantIndex: number, event: Event) {
+  const input = event.target as HTMLInputElement | null
+  const file = input?.files?.[0]
+  if (!file) return
+  uploadErrorMsg.value = null
+  uploadingVariant.value[variantIndex] = true
+  try {
+    const uploaded = await uploadImageFile(file)
+    catalog.value.variants[variantIndex]!.imageUrl = uploaded.publicUrl ?? ''
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string }; message?: string }
+    uploadErrorMsg.value = err?.data?.message || err?.message || '圖片上傳失敗，請稍後再試'
+  } finally {
+    uploadingVariant.value[variantIndex] = false
+    if (input) input.value = ''
+  }
+}
+
 async function saveCatalog() {
   saving.value = true
   errorMsg.value = null
@@ -157,6 +184,12 @@ async function saveCatalog() {
       <div class="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         <p v-if="errorMsg" class="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {{ errorMsg }}
+        </p>
+        <p
+          v-if="uploadErrorMsg"
+          class="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {{ uploadErrorMsg }}
         </p>
 
         <section class="space-y-3">
@@ -291,44 +324,76 @@ async function saveCatalog() {
               </thead>
               <tbody class="divide-y divide-neutral-200 bg-white">
                 <tr v-for="(row, ri) in catalog.variants" :key="ri">
-                  <td class="px-2 py-1.5">
+                  <td class="px-2 py-1.5 align-middle">
                     <input
                       v-model="row.skuCode"
                       type="text"
-                      class="w-28 rounded border border-neutral-300 px-1.5 py-1 text-xs"
+                      class="h-8 w-28 rounded border border-neutral-300 px-2 text-xs"
                     />
                   </td>
-                  <td class="px-2 py-1.5">
+                  <td class="px-2 py-1.5 align-middle">
                     <input
                       v-model="row.price"
                       type="text"
-                      class="w-24 rounded border border-neutral-300 px-1.5 py-1 text-xs"
+                      class="h-8 w-24 rounded border border-neutral-300 px-2 text-xs"
                     />
                   </td>
-                  <td class="px-2 py-1.5">
+                  <td class="px-2 py-1.5 align-middle">
                     <input
                       v-model.number="row.stockQuantity"
                       type="number"
                       min="0"
-                      class="w-20 rounded border border-neutral-300 px-1.5 py-1 text-xs"
+                      class="h-8 w-20 rounded border border-neutral-300 px-2 text-xs"
                     />
                   </td>
-                  <td class="px-2 py-1.5">
-                    <input
-                      v-model="row.imageUrl"
-                      type="text"
-                      class="w-40 max-w-[10rem] rounded border border-neutral-300 px-1.5 py-1 text-xs"
-                      placeholder="可空"
-                    />
+                  <td class="px-2 py-1.5 align-middle">
+                    <div class="flex min-w-[13rem] items-center gap-1">
+                      <input
+                        :id="variantUploadInputId(ri)"
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        :disabled="uploadingVariant[ri] || saving"
+                        @change="onVariantImageUpload(ri, $event)"
+                      />
+                      <input
+                        v-model="row.imageUrl"
+                        type="text"
+                        class="h-8 w-48 rounded border border-neutral-300 px-2 text-xs"
+                        placeholder="可空"
+                      />
+                      <label
+                        :for="variantUploadInputId(ri)"
+                        class="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded border border-neutral-300 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700"
+                        :class="{
+                          'cursor-not-allowed opacity-50': uploadingVariant[ri] || saving,
+                        }"
+                        :title="uploadingVariant[ri] ? '上傳中...' : '上傳圖片'"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          class="h-4 w-4"
+                          aria-hidden="true"
+                        >
+                          <path d="M12 16V6" stroke-linecap="round" />
+                          <path d="M8.5 9.5 12 6l3.5 3.5" stroke-linecap="round" stroke-linejoin="round" />
+                          <path d="M4 16.5v1a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 17.5v-1" stroke-linecap="round" />
+                        </svg>
+                      </label>
+                    </div>
                   </td>
                   <td
                     v-for="(opt, oi) in catalog.options"
                     :key="oi"
-                    class="px-2 py-1.5"
+                    class="px-2 py-1.5 align-middle"
                   >
                     <select
                       v-model.number="row.valueIndexes[oi]"
-                      class="max-w-[8rem] rounded border border-neutral-300 px-1 py-1 text-xs"
+                      class="h-8 max-w-[8rem] rounded border border-neutral-300 px-2 text-xs"
                     >
                       <option
                         v-for="(val, vi) in opt.values"
@@ -339,10 +404,10 @@ async function saveCatalog() {
                       </option>
                     </select>
                   </td>
-                  <td class="px-2 py-1.5">
+                  <td class="px-2 py-1.5 align-middle">
                     <button
                       type="button"
-                      class="text-xs text-red-600 hover:underline"
+                      class="inline-flex h-8 items-center text-xs text-red-600 hover:underline"
                       @click="removeVariant(ri)"
                     >
                       刪除

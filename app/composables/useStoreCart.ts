@@ -9,6 +9,8 @@ export type StoreCartLine = {
   unitPrice: string
   qty: number
   optionSummary?: string
+  isValid?: boolean
+  validationMessage?: string
 }
 
 /**

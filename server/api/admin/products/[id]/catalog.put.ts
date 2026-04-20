@@ -33,6 +33,9 @@ export default defineEventHandler(async (event) => {
     if (getPgSqlState(e) === '23505') {
       throw createError({ statusCode: 409, message: 'SKU 代號與現有資料衝突' })
     }
+    if (getPgSqlState(e) === '23001') {
+      throw createError({ statusCode: 409, message: '部分 SKU 已有訂單，請勿刪除該 SKU' })
+    }
     console.error('[admin/products catalog PUT]', summarizeDbErrorForLog(e))
     throw createError({ statusCode: 500, message: '儲存規格失敗' })
   }

@@ -17,6 +17,8 @@ export type StoreCartLineDto = {
   unitPrice: string
   qty: number
   optionSummary?: string
+  isValid: boolean
+  validationMessage?: string
 }
 
 async function resolveStoreCustomerSession(
@@ -110,7 +112,74 @@ export async function getStoreCartLines(event: H3Event, cartId: string) {
     .from(schema.shopCartLines)
     .where(eq(schema.shopCartLines.cartId, cartId))
 
+  const productIds = [...new Set(rows.map((r) => r.productId))]
+  const products =
+    productIds.length > 0
+      ? await db
+          .select({
+            id: schema.products.id,
+            slug: schema.products.slug,
+            title: schema.products.title,
+          })
+          .from(schema.products)
+          .where(inArray(schema.products.id, productIds))
+      : []
+  const productMap = new Map(products.map((p) => [p.id, p]))
+
+  const variants =
+    productIds.length > 0
+      ? await db
+          .select({
+            id: schema.productVariants.id,
+            productId: schema.productVariants.productId,
+            skuCode: schema.productVariants.skuCode,
+            stockQuantity: schema.productVariants.stockQuantity,
+          })
+          .from(schema.productVariants)
+          .where(inArray(schema.productVariants.productId, productIds))
+      : []
+  const variantMap = new Map(variants.map((v) => [v.id, v]))
+  const variantCountByProduct = new Map<string, number>()
+  for (const v of variants) {
+    variantCountByProduct.set(
+      v.productId,
+      (variantCountByProduct.get(v.productId) ?? 0) + 1,
+    )
+  }
+
   return rows.map((r): StoreCartLineDto => ({
+    ...(() => {
+      const product = productMap.get(r.productId)
+      if (!product) {
+        return {
+          isValid: false,
+          validationMessage: '此商品已下架或不存在，請移除此項目',
+        }
+      }
+      if (r.variantId) {
+        const v = variantMap.get(r.variantId)
+        if (!v || v.productId !== r.productId) {
+          return {
+            isValid: false,
+            validationMessage: `「${r.title}」的規格已失效，請重新選擇`,
+          }
+        }
+        if (v.stockQuantity < r.qty) {
+          return {
+            isValid: false,
+            validationMessage: `「${r.title}」庫存不足（目前最多 ${Math.max(0, v.stockQuantity)} 件）`,
+          }
+        }
+        return { isValid: true as const }
+      }
+      if ((variantCountByProduct.get(r.productId) ?? 0) > 0) {
+        return {
+          isValid: false,
+          validationMessage: `「${r.title}」規格已更新，請重新選擇後再下單`,
+        }
+      }
+      return { isValid: true as const }
+    })(),
     id: r.id,
     productId: r.productId,
     variantId: r.variantId,

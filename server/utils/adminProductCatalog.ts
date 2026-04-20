@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { createError } from 'h3'
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import * as schema from '../database/schema'
@@ -89,6 +89,53 @@ export async function replaceProductCatalog(
       throw createError({ statusCode: 404, message: '找不到商品' })
     }
 
+    const existingVariants = await tx
+      .select({
+        id: schema.productVariants.id,
+        skuCode: schema.productVariants.skuCode,
+      })
+      .from(schema.productVariants)
+      .where(eq(schema.productVariants.productId, productId))
+
+    const oldVariantIdToSkuKey = new Map(
+      existingVariants.map((v) => [v.id, v.skuCode.trim().toLowerCase()]),
+    )
+
+    /** 刪除 variant 前記錄購物車列，儲存後依 SKU 對回新 variant id（僅改庫存時 id 會變但 SKU 不變） */
+    const cartLinesBeforeDelete =
+      existingVariants.length > 0
+        ? await tx
+            .select({
+              id: schema.shopCartLines.id,
+              productVariantId: schema.shopCartLines.productVariantId,
+            })
+            .from(schema.shopCartLines)
+            .where(
+              inArray(
+                schema.shopCartLines.productVariantId,
+                existingVariants.map((v) => v.id),
+              ),
+            )
+        : []
+
+    if (existingVariants.length > 0) {
+      const existingVariantIds = existingVariants.map((v) => v.id)
+      // catalog 會重建 variants（id 會更新），先解除歷史引用避免 FK 阻擋刪除。
+      await tx
+        .update(schema.shopOrderLines)
+        .set({ productVariantId: null })
+        .where(
+          inArray(schema.shopOrderLines.productVariantId, existingVariantIds),
+        )
+
+      await tx
+        .update(schema.shopCartLines)
+        .set({ productVariantId: null })
+        .where(
+          inArray(schema.shopCartLines.productVariantId, existingVariantIds),
+        )
+    }
+
     await tx
       .delete(schema.productVariants)
       .where(eq(schema.productVariants.productId, productId))
@@ -98,6 +145,7 @@ export async function replaceProductCatalog(
       .where(eq(schema.productOptions.productId, productId))
 
     const valueMatrix: string[][] = []
+    const newSkuKeyToVariantId = new Map<string, string>()
 
     for (const opt of body.options) {
       const [insertedOpt] = await tx
@@ -134,6 +182,7 @@ export async function replaceProductCatalog(
     const optLen = body.options.length
 
     for (const v of body.variants) {
+      const skuKey = v.skuCode.trim().toLowerCase()
       const [pv] = await tx
         .insert(schema.productVariants)
         .values({
@@ -148,6 +197,7 @@ export async function replaceProductCatalog(
       if (!pv) {
         throw createError({ statusCode: 500, message: '建立 SKU 失敗' })
       }
+      newSkuKeyToVariantId.set(skuKey, pv.id)
 
       for (let i = 0; i < optLen; i++) {
         const vi = v.valueIndexes[i]!
@@ -157,6 +207,19 @@ export async function replaceProductCatalog(
           optionValueId,
         })
       }
+    }
+
+    for (const row of cartLinesBeforeDelete) {
+      const oldVid = row.productVariantId
+      if (!oldVid) continue
+      const skuKey = oldVariantIdToSkuKey.get(oldVid)
+      if (!skuKey) continue
+      const newVid = newSkuKeyToVariantId.get(skuKey)
+      if (!newVid) continue
+      await tx
+        .update(schema.shopCartLines)
+        .set({ productVariantId: newVid, updatedAt: new Date() })
+        .where(eq(schema.shopCartLines.id, row.id))
     }
   })
 }

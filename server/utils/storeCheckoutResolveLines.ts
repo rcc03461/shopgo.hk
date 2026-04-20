@@ -118,7 +118,10 @@ export async function resolveCheckoutLines(
       }
       const hit = variants.find((v) => v.id === variantId)
       if (!hit) {
-        throw createError({ statusCode: 400, message: '購物車含無效的 SKU' })
+        throw createError({
+          statusCode: 400,
+          message: `「${product.title}」規格已失效，請返回購物車重新選擇`,
+        })
       }
       unitPrice = String(hit.price)
       sku = hit.skuCode

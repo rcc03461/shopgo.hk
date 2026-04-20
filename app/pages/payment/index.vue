@@ -27,7 +27,7 @@ type ShippingSettings = {
 }
 
 const tenantSlug = useState<string | null>('oshop-tenant-slug')
-const { lines, subtotalMoney } = useStoreCart()
+const { lines, subtotalMoney, syncFromServer } = useStoreCart()
 const requestFetch = useRequestFetch()
 
 const customerEmail = ref('')
@@ -116,6 +116,14 @@ onMounted(() => {
 async function submitCheckout() {
   err.value = null
   if (!tenantSlug.value) return
+  await syncFromServer()
+  const invalidLine = lines.value.find((l) => l.isValid === false)
+  if (invalidLine) {
+    err.value =
+      invalidLine.validationMessage ??
+      '購物車內有失效項目，請返回購物車調整後再結帳'
+    return
+  }
   if (lines.value.length === 0) {
     void navigateTo('/cart')
     return
