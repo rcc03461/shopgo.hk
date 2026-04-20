@@ -228,7 +228,8 @@ const totalPages = computed(() => {
                       v-if="item.coverUrl"
                       :src="item.coverUrl"
                       :alt="item.title"
-                      class="h-full w-full object-cover transition group-hover:opacity-95"
+                      class="h-full w-full object-cover transition group-hover:opacity-95 object-center aspect-square"
+                      loading="lazy"
                     >
                     <div
                       v-else
