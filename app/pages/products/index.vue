@@ -12,10 +12,16 @@ type ListItem = {
   slug: string
   title: string
   basePrice: string
+  originalPrice: string | null
   displayPrice: string
   hasVariants: boolean
   coverUrl: string | null
   updatedAt: string
+}
+
+function shouldShowOriginalPrice(originalPrice: string | null, displayPrice: string) {
+  if (!originalPrice) return false
+  return Number(originalPrice) > Number(displayPrice)
 }
 
 type ListResponse = {
@@ -241,6 +247,12 @@ const totalPages = computed(() => {
                     <p class="mt-auto pt-2 text-sm font-medium text-neutral-900">
                       {{ formatHkd(item.displayPrice) }}
                       <span v-if="item.hasVariants" class="text-xs font-normal text-neutral-500">起</span>
+                    </p>
+                    <p
+                      v-if="shouldShowOriginalPrice(item.originalPrice, item.displayPrice)"
+                      class="text-xs text-neutral-400 line-through"
+                    >
+                      {{ formatHkd(item.originalPrice!) }}
                     </p>
                   </div>
                 </NuxtLink>

@@ -8,6 +8,7 @@ type Row = {
   slug: string
   title: string
   basePrice: string
+  originalPrice: string | null
   updatedAt: string
   variantCount: number
   categoryCount: number
@@ -122,18 +123,19 @@ function onSearchInput() {
             <th class="px-4 py-3">SKU 數</th>
             <th class="px-4 py-3">分類</th>
             <th class="px-4 py-3">基準價</th>
+            <th class="px-4 py-3">原價</th>
             <th class="px-4 py-3">更新</th>
             <th class="px-4 py-3" />
           </tr>
         </thead>
         <tbody class="divide-y divide-neutral-200">
           <tr v-if="pending">
-            <td colspan="7" class="px-4 py-6 text-center text-neutral-500">
+            <td colspan="8" class="px-4 py-6 text-center text-neutral-500">
               載入中…
             </td>
           </tr>
           <tr v-else-if="!data?.items.length">
-            <td colspan="7" class="px-4 py-6 text-center text-neutral-500">
+            <td colspan="8" class="px-4 py-6 text-center text-neutral-500">
               尚無商品
             </td>
           </tr>
@@ -159,6 +161,9 @@ function onSearchInput() {
             </td>
             <td class="px-4 py-3 text-neutral-700">
               {{ formatPrice(row.basePrice) }}
+            </td>
+            <td class="px-4 py-3 text-neutral-700">
+              {{ row.originalPrice || '—' }}
             </td>
             <td class="px-4 py-3 text-xs text-neutral-600">
               {{ formatTime(row.updatedAt) }}

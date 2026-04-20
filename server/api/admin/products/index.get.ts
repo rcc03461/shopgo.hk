@@ -44,6 +44,7 @@ export default defineEventHandler(async (event) => {
       slug: schema.products.slug,
       title: schema.products.title,
       basePrice: schema.products.basePrice,
+      originalPrice: schema.products.originalPrice,
       updatedAt: schema.products.updatedAt,
     })
     .from(schema.products)
@@ -104,6 +105,8 @@ export default defineEventHandler(async (event) => {
       const catNames = categoryNamesByProduct.get(r.id) ?? []
       return {
         ...r,
+        basePrice: String(r.basePrice),
+        originalPrice: r.originalPrice ? String(r.originalPrice) : null,
         variantCount: variantCountMap.get(r.id) ?? 0,
         categoryCount: catNames.length,
         categorySummary: formatCategorySummary(catNames),

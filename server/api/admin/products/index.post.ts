@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
           title: data.title,
           description: data.description ?? null,
           basePrice: data.basePrice,
+          originalPrice: data.originalPrice ?? null,
           coverAttachmentId: null,
           updatedAt: new Date(),
         })
@@ -60,7 +61,13 @@ export default defineEventHandler(async (event) => {
       return out ?? row
     })
 
-    return { product: { ...result, basePrice: String(result.basePrice) } }
+    return {
+      product: {
+        ...result,
+        basePrice: String(result.basePrice),
+        originalPrice: result.originalPrice ? String(result.originalPrice) : null,
+      },
+    }
   } catch (e: unknown) {
     if (isError(e)) throw e
     if (getPgSqlState(e) === '23505') {

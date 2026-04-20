@@ -31,6 +31,7 @@ export const adminCreateProductBodySchema = z.object({
     .nullable()
     .transform((v) => (v === '' ? null : v)),
   basePrice: decimalStringSchema,
+  originalPrice: decimalStringSchema.optional().nullable(),
   coverAttachmentId: uuidNullable.optional(),
   galleryAttachmentIds: z.array(z.string().uuid()).optional().default([]),
   categoryIds: categoryIdsSchema.optional().default([]),
@@ -47,6 +48,7 @@ export const adminPatchProductBodySchema = z.object({
     .nullable()
     .transform((v) => (v === '' ? null : v)),
   basePrice: decimalStringSchema.optional(),
+  originalPrice: decimalStringSchema.optional().nullable(),
   coverAttachmentId: uuidNullable.optional(),
   galleryAttachmentIds: z.array(z.string().uuid()).optional(),
   categoryIds: categoryIdsSchema.optional(),

@@ -179,6 +179,7 @@ export const products = pgTable(
     basePrice: numeric('base_price', { precision: 14, scale: 4 })
       .notNull()
       .default('0'),
+    originalPrice: numeric('original_price', { precision: 14, scale: 4 }),
     coverAttachmentId: uuid('cover_attachment_id').references(
       () => attachments.id,
       { onDelete: 'set null' },

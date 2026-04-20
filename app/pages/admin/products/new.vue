@@ -10,6 +10,7 @@ const form = reactive({
   slug: '',
   description: '',
   basePrice: '0',
+  originalPrice: '',
 })
 
 const coverAttachmentId = ref<string | null>(null)
@@ -31,6 +32,7 @@ async function submit() {
         slug: form.slug,
         description: form.description || null,
         basePrice: form.basePrice,
+        originalPrice: form.originalPrice || null,
         coverAttachmentId: coverAttachmentId.value,
         galleryAttachmentIds: galleryItems.value.map((g) => g.id),
         categoryIds: categoryIds.value,
@@ -76,6 +78,11 @@ async function submit() {
         v-model="form.basePrice"
         label="基準價（NUMERIC 字串）"
         required
+      />
+
+      <AdminFormPriceInput
+        v-model="form.originalPrice"
+        label="原價（僅展示，可留空）"
       />
 
       <AdminProductCategoryFields v-model="categoryIds" />

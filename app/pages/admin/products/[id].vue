@@ -28,6 +28,7 @@ type Detail = {
     title: string
     description: string | null
     basePrice: string
+    originalPrice: string | null
     coverAttachmentId: string | null
     cover: AttachmentDto | null
     galleryAttachments: AttachmentDto[]
@@ -73,6 +74,7 @@ const form = reactive({
   slug: '',
   description: '',
   basePrice: '0',
+  originalPrice: '',
 })
 
 const coverAttachmentId = ref<string | null>(null)
@@ -95,6 +97,7 @@ watch(
     form.slug = v.product.slug
     form.description = v.product.description ?? ''
     form.basePrice = v.product.basePrice
+    form.originalPrice = v.product.originalPrice ?? ''
     coverAttachmentId.value = v.product.coverAttachmentId
     galleryItems.value = v.product.galleryAttachments.map(toMediaItem)
     categoryIds.value = (v.product.categories ?? []).map((c) => c.id)
@@ -117,6 +120,7 @@ async function saveMain() {
         slug: form.slug,
         description: form.description || null,
         basePrice: form.basePrice,
+        originalPrice: form.originalPrice || null,
         coverAttachmentId: coverAttachmentId.value,
         galleryAttachmentIds: galleryItems.value.map((g) => g.id),
         categoryIds: categoryIds.value,
@@ -228,6 +232,11 @@ const coverPreview = computed<ProductMediaItem | null>(() => {
           v-model="form.basePrice"
           label="基準價（NUMERIC 字串）"
           required
+        />
+
+        <AdminFormPriceInput
+          v-model="form.originalPrice"
+          label="原價（僅展示，可留空）"
         />
 
         <AdminProductCategoryFields v-model="categoryIds" />

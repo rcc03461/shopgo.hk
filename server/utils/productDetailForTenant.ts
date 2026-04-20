@@ -225,6 +225,7 @@ export async function loadProductDetailForTenant(
       title: product.title,
       description: product.description,
       basePrice: String(product.basePrice),
+      originalPrice: product.originalPrice ? String(product.originalPrice) : null,
       coverAttachmentId: product.coverAttachmentId,
       cover,
       galleryAttachments,

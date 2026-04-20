@@ -69,12 +69,16 @@ export default defineEventHandler(async (event) => {
       if (patch.slug !== undefined) next.slug = patch.slug
       if (patch.description !== undefined) next.description = patch.description
       if (patch.basePrice !== undefined) next.basePrice = patch.basePrice
+      if (patch.originalPrice !== undefined) {
+        next.originalPrice = patch.originalPrice
+      }
 
       const hasTextField =
         patch.title !== undefined ||
         patch.slug !== undefined ||
         patch.description !== undefined ||
-        patch.basePrice !== undefined
+        patch.basePrice !== undefined ||
+        patch.originalPrice !== undefined
 
       if (hasTextField || wantsMedia) {
         const [row] = await tx
@@ -136,7 +140,13 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, message: '找不到商品' })
     }
 
-    return { product: { ...updated, basePrice: String(updated.basePrice) } }
+    return {
+      product: {
+        ...updated,
+        basePrice: String(updated.basePrice),
+        originalPrice: updated.originalPrice ? String(updated.originalPrice) : null,
+      },
+    }
   } catch (e: unknown) {
     if (isError(e)) throw e
     if (getPgSqlState(e) === '23505') {

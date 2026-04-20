@@ -103,6 +103,7 @@ export default defineEventHandler(async (event) => {
       slug: schema.products.slug,
       title: schema.products.title,
       basePrice: schema.products.basePrice,
+      originalPrice: schema.products.originalPrice,
       coverAttachmentId: schema.products.coverAttachmentId,
       updatedAt: schema.products.updatedAt,
     })
@@ -167,6 +168,7 @@ export default defineEventHandler(async (event) => {
         slug: r.slug,
         title: r.title,
         basePrice: String(r.basePrice),
+        originalPrice: r.originalPrice ? String(r.originalPrice) : null,
         displayPrice,
         hasVariants: Boolean(variantFloor),
         coverUrl,

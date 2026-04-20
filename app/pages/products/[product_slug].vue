@@ -22,6 +22,7 @@ type Product = {
   title: string
   description: string | null
   basePrice: string
+  originalPrice: string | null
   coverAttachmentId: string | null
   cover: Attachment | null
   galleryAttachments: Attachment[]
@@ -138,6 +139,13 @@ const displayPrice = computed(() => {
   if (!d) return null
   if (activeVariant.value) return activeVariant.value.price
   return d.product.basePrice
+})
+
+const showOriginalPrice = computed(() => {
+  const d = data.value
+  const p = displayPrice.value
+  if (!d || !p || !d.product.originalPrice) return false
+  return Number(d.product.originalPrice) > Number(p)
 })
 
 const { addLine } = useStoreCart()
@@ -258,6 +266,12 @@ async function handleAddToCart() {
             >
               （請選擇規格）
             </span>
+          </p>
+          <p
+            v-if="showOriginalPrice"
+            class="mt-1 text-sm text-neutral-400 line-through"
+          >
+            {{ formatHkd(data.product.originalPrice!) }}
           </p>
           <p
             v-if="activeVariant"
