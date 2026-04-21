@@ -92,6 +92,13 @@
       "when": 1777003200000,
       "tag": "0012_products_original_price",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1777081200000,
+      "tag": "0013_pages",
+      "breakpoints": true
     }
   ]
 }

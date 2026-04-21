@@ -227,6 +227,37 @@ export const categories = pgTable(
   ],
 )
 
+/** 租戶 CMS 頁面（公開路由 /p/[page_slug]） */
+export const pages = pgTable(
+  'pages',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    slug: varchar('slug', { length: 255 }).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    excerpt: text('excerpt'),
+    contentMarkdown: text('content_markdown').notNull().default(''),
+    status: varchar('status', { length: 32 }).notNull().default('draft'),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    seoTitle: varchar('seo_title', { length: 255 }),
+    seoDescription: text('seo_description'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    uniqueIndex('pages_tenant_id_slug_uidx').on(t.tenantId, t.slug),
+    index('pages_tenant_id_idx').on(t.tenantId),
+    index('pages_tenant_status_idx').on(t.tenantId, t.status),
+    index('pages_tenant_updated_idx').on(t.tenantId, t.updatedAt),
+  ],
+)
+
 /** 商品與分類多對多（`sort_order` 為該商品上的分類排序） */
 export const productCategories = pgTable(
   'product_categories',

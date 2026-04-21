@@ -24,7 +24,16 @@
 - [x] **商品**：Drizzle schema、`/admin/products` 列表／`new`／`[id]` + `PUT .../catalog`（規格 Drawer）；價格 NUMERIC、後台 id／前台 slug 見 `docs/plan-admin-products-variants.md`
 - [x] **訂單（後台）**：`/admin/orders` 列表與 `/admin/orders/[id]` 詳情 API + UI
 - [x] **顧客（後台）**：`/admin/customers` 列表、`/admin/customers/[id]` 詳情、狀態更新（active/disabled）
-- [ ] **CMS 頁**：資料表 + Admin `/admin/pages` CRUD；公開路由 ` /p/[page_slug]` 渲染
+- [ ] **CMS 頁（總項）**：資料表 + Admin `/admin/pages` CRUD；公開路由 ` /p/[page_slug]` 渲染
+  - [ ] `pages` schema + migration（tenant 唯一 slug、status、published_at）
+  - [ ] Admin API：`GET/POST /api/admin/pages`、`GET/PATCH/DELETE /api/admin/pages/[id]`
+  - [ ] Admin UI：`/admin/pages` 列表（搜尋/分頁/狀態）
+  - [ ] Admin UI：`/admin/pages/new`、`/admin/pages/[id]` 表單
+  - [ ] 內容編輯器：導入 Milkdown（先基礎工具列）
+  - [ ] 公開 API：`GET /api/store/pages/[slug]`（僅 published）
+  - [ ] 公開頁：`/p/[page_slug]` SSR 渲染 + 404
+  - [ ] 安全：Markdown->HTML sanitize（XSS 防護）
+  - [ ] 手測：draft/published/archived 可見性與租戶隔離
 - [x] **收款**：`/admin/settings/payment` 真實欄位、敏感資料加密儲存、僅 server 解密
 
 ---
