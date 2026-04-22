@@ -14,8 +14,6 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@dnd-kit/helpers": "^0.4.0",
-    "@dnd-kit/vue": "^0.4.0",
     "@electric-sql/pglite": "^0.4.4",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@vueup/vue-quill": "^1.2.0",
@@ -31,6 +29,7 @@
     "turndown": "^7.2.4",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4",
+    "vuedraggable": "^4.1.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

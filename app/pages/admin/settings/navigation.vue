@@ -176,6 +176,10 @@ async function saveDrawer(payload: {
     activeItem.value.pageId = res.item.pageId
     activeItem.value.customUrl = res.item.customUrl
     activeItem.value.target = res.item.target
+    activeItem.value.pageSlug =
+      payload.linkType === 'page'
+        ? (pagesData.value?.items.find((p) => p.id === payload.pageId)?.slug ?? null)
+        : null
     drawerOpen.value = false
     activeItem.value = null
   } catch (e: unknown) {

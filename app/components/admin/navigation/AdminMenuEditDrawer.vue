@@ -30,11 +30,13 @@ const form = reactive({
   customUrl: '',
   target: '_self' as '_self' | '_blank',
 })
+const localError = ref<string | null>(null)
 
 watch(
   () => props.item,
   (item) => {
     if (!item) return
+    localError.value = null
     form.title = item.title
     form.linkType = item.linkType
     form.pageId = item.pageId
@@ -44,9 +46,37 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => form.linkType,
+  (type) => {
+    localError.value = null
+    if (type === 'page' && !form.pageId && props.pages.length > 0) {
+      form.pageId = props.pages[0]!.id
+    }
+    if (type === 'custom' && !form.customUrl) {
+      form.customUrl = '/'
+    }
+  },
+)
+
 function onSave() {
+  localError.value = null
+  const title = form.title.trim()
+  if (!title) {
+    localError.value = '請填寫名稱'
+    return
+  }
+  if (form.linkType === 'page' && !form.pageId) {
+    localError.value = '請先選擇要連結的頁面'
+    return
+  }
+  if (form.linkType === 'custom' && !form.customUrl.trim()) {
+    localError.value = '請填寫自訂連結'
+    return
+  }
+
   emit('save', {
-    title: form.title.trim(),
+    title,
     linkType: form.linkType,
     pageId: form.linkType === 'page' ? form.pageId : null,
     customUrl: form.linkType === 'custom' ? form.customUrl.trim() : null,
@@ -76,6 +106,13 @@ function onSave() {
       </div>
 
       <div class="mt-4 space-y-4">
+        <p
+          v-if="localError"
+          class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          {{ localError }}
+        </p>
+
         <AdminFormTextInput
           v-model="form.title"
           label="名稱"
