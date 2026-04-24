@@ -12,13 +12,14 @@ defineProps<HomepageCategoryModuleConfig>()
       </h2>
     </div>
     <div class="flex flex-wrap gap-2">
-      <span
+      <NuxtLink
         v-for="category in categories"
         :key="category.id"
+        :to="{ path: '/products', query: { categoryId: category.id } }"
         class="rounded-full border border-neutral-300 px-3 py-1 text-sm text-neutral-700"
       >
         {{ category.label }}
-      </span>
+      </NuxtLink>
     </div>
   </section>
 </template>

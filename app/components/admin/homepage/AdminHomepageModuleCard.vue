@@ -105,8 +105,7 @@ const footerConfig = computed<HomepageFooterModuleConfig | null>(() =>
       <AdminHomepageModuleFormCategory
         v-else-if="module.component === 'category_grid1' && categoryConfig"
         :config="categoryConfig"
-        @add-category="emit('addCategory', module as HomepageDynamicModule<'category_grid1'>)"
-        @remove-category="(index) => emit('removeCategory', module as HomepageDynamicModule<'category_grid1'>, index)"
+        :available-categories="availableCategories ?? []"
       />
 
       <AdminHomepageModuleFormProducts

@@ -1,14 +1,46 @@
 <script setup lang="ts">
 import type { HomepageCategoryModuleConfig } from '../../../types/homepage'
 
-defineProps<{
+const props = defineProps<{
   config: HomepageCategoryModuleConfig
+  availableCategories?: Array<{ id: string; label: string }>
 }>()
 
-const emit = defineEmits<{
-  addCategory: []
-  removeCategory: [index: number]
-}>()
+const categorySearch = ref('')
+const selectedCategoryIds = computed(() => new Set((props.config.categories ?? []).map((item) => item.id)))
+const availableCategoryOptions = computed(() => props.availableCategories ?? [])
+
+const filteredCategoryOptions = computed(() => {
+  const keyword = categorySearch.value.trim().toLowerCase()
+  if (!keyword) return availableCategoryOptions.value
+  return availableCategoryOptions.value.filter((category) => {
+    const haystack = `${category.label} ${category.id}`.toLowerCase()
+    return haystack.includes(keyword)
+  })
+})
+
+function syncCategories(nextIds: string[]) {
+  const map = new Map(availableCategoryOptions.value.map((item) => [item.id, item]))
+  props.config.categories = nextIds.map((id) => {
+    const option = map.get(id)
+    return { id, label: option?.label ?? id }
+  })
+}
+
+function toggleCategory(id: string) {
+  const ids = new Set(selectedCategoryIds.value)
+  if (ids.has(id)) ids.delete(id)
+  else ids.add(id)
+  syncCategories([...ids])
+}
+
+function selectAllCategories() {
+  syncCategories(availableCategoryOptions.value.map((item) => item.id))
+}
+
+function clearCategories() {
+  syncCategories([])
+}
 </script>
 
 <template>
@@ -23,43 +55,56 @@ const emit = defineEmits<{
     </label>
     <div class="rounded-md border border-neutral-200 p-3">
       <div class="mb-2 flex items-center justify-between">
-        <p class="text-xs font-medium text-neutral-500">分類列表</p>
-        <button
-          type="button"
-          class="rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-700 hover:bg-neutral-50"
-          @click="emit('addCategory')"
-        >
-          新增分類
-        </button>
-      </div>
-      <div class="space-y-2">
-        <div
-          v-for="(category, cIdx) in config.categories"
-          :key="`cat-${category.id}-${cIdx}`"
-          class="grid gap-2 md:grid-cols-[1fr_2fr_auto]"
-        >
-          <input
-            v-model="category.id"
-            type="text"
-            class="rounded border border-neutral-300 px-2 py-1.5 text-sm"
-            placeholder="category id"
-          >
-          <input
-            v-model="category.label"
-            type="text"
-            class="rounded border border-neutral-300 px-2 py-1.5 text-sm"
-            placeholder="分類名稱"
-          >
+        <p class="text-xs font-medium text-neutral-500">
+          分類列表（已選 {{ config.categories.length }}）
+        </p>
+        <div class="flex gap-2">
           <button
             type="button"
-            class="rounded border border-red-200 px-2 py-1.5 text-xs text-red-700 hover:bg-red-50"
-            @click="emit('removeCategory', cIdx)"
+            class="rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-700 hover:bg-neutral-50"
+            @click="selectAllCategories"
           >
-            刪除
+            全選
+          </button>
+          <button
+            type="button"
+            class="rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-700 hover:bg-neutral-50"
+            @click="clearCategories"
+          >
+            清空
           </button>
         </div>
-        <p v-if="!config.categories.length" class="text-xs text-neutral-500">
-          尚未設定分類，請先新增至少一個分類。
+      </div>
+      <label class="mb-2 block text-xs text-neutral-600">
+        搜尋分類（名稱 / ID）
+        <input
+          v-model.trim="categorySearch"
+          type="text"
+          class="mt-1 w-full rounded border border-neutral-300 px-2 py-1.5 text-sm"
+          placeholder="例如：new-arrivals / 家居生活"
+        >
+      </label>
+      <div class="max-h-48 space-y-1 overflow-auto rounded border border-neutral-200 bg-white p-2">
+        <label
+          v-for="category in filteredCategoryOptions"
+          :key="`pick-category-${category.id}`"
+          class="flex items-center justify-between gap-2 rounded px-2 py-1 hover:bg-neutral-50"
+        >
+          <span class="min-w-0 truncate text-xs text-neutral-700">
+            {{ category.label }} ({{ category.id }})
+          </span>
+          <input
+            type="checkbox"
+            :checked="selectedCategoryIds.has(category.id)"
+            class="h-4 w-4 rounded border-neutral-300"
+            @change="toggleCategory(category.id)"
+          >
+        </label>
+        <p v-if="!availableCategoryOptions.length" class="text-xs text-neutral-500">
+          /admin/categories 暫無分類資料。
+        </p>
+        <p v-else-if="!filteredCategoryOptions.length" class="text-xs text-neutral-500">
+          沒有符合搜尋條件的分類。
         </p>
       </div>
     </div>
