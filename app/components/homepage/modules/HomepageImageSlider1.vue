@@ -64,8 +64,11 @@ watch(
 watch(
   () => [props.ui?.autoplay, props.ui?.intervalMs, props.ui?.loop, slides.value.length],
   () => startAutoplay(),
-  { immediate: true },
 )
+
+onMounted(() => {
+  startAutoplay()
+})
 
 onBeforeUnmount(() => stopAutoplay())
 </script>
