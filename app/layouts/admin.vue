@@ -5,6 +5,7 @@ const nav = [
   { to: '/admin/dashboard', label: '總覽' },
   { to: '/admin/homepage', label: '首頁模組' },
   { to: '/admin/navigation', label: '菜單' },
+  { to: '/admin/media-assets', label: 'Media Assets' },
   { to: '/admin/pages', label: '頁面' },
   { to: '/admin/categories', label: '分類' },
   { to: '/admin/products', label: '商品' },

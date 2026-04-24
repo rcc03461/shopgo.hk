@@ -3,6 +3,25 @@ import { z } from 'zod'
 export const homepageModuleTypeSchema = z.enum(['nav', 'banner', 'image_slider', 'category', 'products', 'footer'])
 export const homepageVersionStateSchema = z.enum(['draft', 'published'])
 
+/**
+ * 支援兩種圖片來源：
+ * - 完整 URL（http/https）
+ * - 站內相對路徑（例：/uploads/tenant-id/file.jpg）
+ */
+const publicAssetUrlSchema = z.string().trim().refine((value) => {
+  if (!value) return false
+  if (value.startsWith('/')) return true
+  const lower = value.toLowerCase()
+  if (!lower.startsWith('http://') && !lower.startsWith('https://')) return false
+  try {
+    // 僅檢查 URL 格式，不限制 host
+    new URL(value)
+    return true
+  } catch {
+    return false
+  }
+}, '請輸入有效圖片網址（http/https 或 / 開頭路徑）')
+
 const navConfigSchema = z.object({
   show: z.boolean().default(true),
 })
@@ -38,7 +57,7 @@ const imageSliderConfigSchema = z.object({
   slides: z.array(
     z.object({
       id: z.string().trim().min(1).max(80),
-      imageUrl: z.string().trim().url(),
+      imageUrl: publicAssetUrlSchema,
       alt: z.string().trim().max(200).optional(),
       linkUrl: z.string().trim().max(255).optional(),
     }),
@@ -65,7 +84,7 @@ const productsConfigSchema = z.object({
       name: z.string().trim().min(1).max(120),
       slug: z.string().trim().min(1).max(255),
       priceLabel: z.string().trim().min(1).max(40),
-      imageUrl: z.string().trim().url(),
+          imageUrl: publicAssetUrlSchema,
     }),
   ).max(60),
 })
@@ -153,7 +172,7 @@ const dynamicModuleSchema = z.object({
           name: z.string().trim().min(1).max(120),
           slug: z.string().trim().min(1).max(255),
           priceLabel: z.string().trim().min(1).max(40),
-          imageUrl: z.string().trim().url(),
+          imageUrl: publicAssetUrlSchema,
         }),
       ).max(120).optional(),
       source: dynamicProductSourceSchema,
