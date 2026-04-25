@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageDynamicModule } from '~/types/homepage'
+import type { HomepageDynamicModule } from '../../../types/homepage'
 
 defineProps<{
   modules: HomepageDynamicModule[]

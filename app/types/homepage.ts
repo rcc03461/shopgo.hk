@@ -1,4 +1,4 @@
-import type { LandingCategory, LandingHero, LandingProductCard } from '~/types/landing'
+import type { LandingCategory, LandingHero, LandingProductCard } from './landing'
 
 export const HOMEPAGE_MODULE_TYPES = ['nav', 'banner', 'image_slider', 'category', 'products', 'footer'] as const
 export type HomepageModuleType = (typeof HOMEPAGE_MODULE_TYPES)[number]

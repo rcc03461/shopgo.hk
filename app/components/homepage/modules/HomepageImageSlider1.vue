@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageImageSliderModuleConfig } from '~/types/homepage'
+import type { HomepageImageSliderModuleConfig } from '../../../types/homepage'
 
 const props = defineProps<HomepageImageSliderModuleConfig>()
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageDynamicModule, HomepageModule } from '~/types/homepage'
+import type { HomepageDynamicModule, HomepageModule } from '../../types/homepage'
 import { homepageModuleRegistry } from './registry'
 import { toDynamicHomepageModule } from '~/utils/homepageEditor'
 

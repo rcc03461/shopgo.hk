@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageFooterModuleConfig } from '~/types/homepage'
+import type { HomepageFooterModuleConfig } from '../../../types/homepage'
 
 defineProps<HomepageFooterModuleConfig>()
 </script>

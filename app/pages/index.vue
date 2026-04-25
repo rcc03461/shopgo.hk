@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { landingHero, landingSlides } from '~/data/landing'
 import type { LandingCategory, LandingProductCard } from '~/types/landing'
-import type { HomepageDynamicModule, HomepageModule, HomepageProductSliderProps } from '~/types/homepage'
+import type { HomepageDynamicModule, HomepageModule, HomepageProductSliderProps } from '../types/homepage'
 import { collectHomepageProductCategoryIds, resolveDynamicHomepageModules } from '~/utils/homepageModuleResolvers'
 import { toDynamicHomepageModule } from '~/utils/homepageEditor'
 import { formatHkd } from '~/utils/formatHkd'

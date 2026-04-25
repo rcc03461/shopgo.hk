@@ -1,7 +1,7 @@
 import type {
   HomepageDynamicModule,
   HomepageProductSliderProps,
-} from '~/types/homepage'
+} from '../types/homepage'
 import type { LandingCategory, LandingProductCard } from '~/types/landing'
 import { ensureDynamicModuleProps, toDynamicHomepageModule } from './homepageEditor'
 

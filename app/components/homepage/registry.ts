@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { HomepageModuleComponentKey } from '~/types/homepage'
+import type { HomepageModuleComponentKey } from '../../types/homepage'
 import HomepageFooter1 from './modules/HomepageFooter1.vue'
 import HomepageHero3 from './modules/HomepageHero3.vue'
 import HomepageImageSlider1 from './modules/HomepageImageSlider1.vue'

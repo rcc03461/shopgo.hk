@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageModuleComponentKey } from '~/types/homepage'
+import type { HomepageModuleComponentKey } from '../../types/homepage'
 
 definePageMeta({
   layout: 'admin',

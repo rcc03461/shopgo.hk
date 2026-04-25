@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageProductSliderProps } from '~/types/homepage'
+import type { HomepageProductSliderProps } from '../../../types/homepage'
 
 const props = defineProps<HomepageProductSliderProps>()
 

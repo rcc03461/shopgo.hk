@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HomepageBannerModuleConfig } from '~/types/homepage'
+import type { HomepageBannerModuleConfig } from '../../../types/homepage'
 
 defineProps<HomepageBannerModuleConfig>()
 </script>
