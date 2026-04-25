@@ -158,7 +158,7 @@ docker compose exec app npm run db:migrate
 ### 5) aaPanel Nginx 反向代理
 
 可使用 `deploy/nginx/oshop.conf` 作為範本；核心是把
-`shopgo.hk` 與 `*.shopgo.hk` 都反代到 `127.0.0.1:3000`。
+`shopgo.hk` 與 `*.shopgo.hk` 都反代到 `127.0.0.1:8555`。
 
 ### 6) 日常更新
 

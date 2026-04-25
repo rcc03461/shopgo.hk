@@ -5,21 +5,18 @@ services:
       dockerfile: Dockerfile
     container_name: hxm-oshop-app
     restart: unless-stopped
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
+    network_mode: host
     env_file:
       - .env
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
-      PORT: 3000
+      PORT: 8555
       # 資料庫改由 VPS 上既有 PostgreSQL 提供，請在 .env 設定以下值：
       # db_host, db_port, db_user, db_password, db_name（或直接給 DATABASE_URL）
       DB_SSLMODE: ${DB_SSLMODE:-disable}
-    ports:
-      - "127.0.0.1:8555:3000"
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8555').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 30s
       timeout: 5s
       retries: 5
