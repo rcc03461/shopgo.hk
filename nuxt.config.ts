@@ -16,6 +16,17 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/tailwind.css'],
+  routeRules: {
+    // 後台與登入後互動頁不需要 SSR，但仍保留 Nitro API 與後端能力。
+    '/admin/**': { ssr: false },
+    '/login': { ssr: false },
+    '/register': { ssr: false },
+    '/cart': { ssr: false },
+    '/payment': { ssr: false },
+    '/payment/**': { ssr: false },
+    '/profile': { ssr: false },
+    '/profile/**': { ssr: false },
+  },
   // Windows 上 hosts 將 oshop.com.hk 指到 127.0.0.1（IPv4），若 dev 只綁 ::1 會 ERR_CONNECTION_REFUSED
   devServer: {
     host: '0.0.0.0',

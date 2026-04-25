@@ -8,8 +8,8 @@ export default defineNuxtRouteMiddleware(() => {
   const state = useState<string | null>('oshop-tenant-slug', () => null)
   if (import.meta.client) {
     const nuxtApp = useNuxtApp()
-    // hydration 期間沿用 SSR 注水狀態，避免首屏 DOM 分支不一致。
-    if (nuxtApp.isHydrating) return
+    // SSR 頁面 hydration 期間沿用注水狀態；CSR-only route 沒有 SSR state，仍須從 window.location 解析。
+    if (nuxtApp.isHydrating && nuxtApp.payload.serverRendered) return
   }
 
   const config = useRuntimeConfig()
