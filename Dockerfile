@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.22-alpine AS base
+FROM oven/bun:1.2.22 AS base
 WORKDIR /app
 
 # 先安裝依賴以提升快取命中率
@@ -9,7 +9,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
-FROM oven/bun:1.2.22-alpine AS runner
+FROM oven/bun:1.2.22 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
