@@ -3,6 +3,7 @@ const { user, refresh, logout } = useAuth()
 const { customer, refresh: refreshCustomer, logout: logoutCustomer } = useCustomerAuth()
 const tenantSlug = useState<string | null>('oshop-tenant-slug')
 const { totalQty } = useStoreCart()
+const { openCartDrawer } = useCartDrawer()
 const requestFetch = useRequestFetch()
 
 type StoreNavItem = {
@@ -143,10 +144,11 @@ async function handleCustomerLogout() {
               {{ item.title }}
             </a>
           </template>
-          <NuxtLink
+          <button
             v-if="tenantSlug"
-            to="/cart"
+            type="button"
             class="relative rounded-md px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50"
+            @click="openCartDrawer"
           >
             購物車
             <span
@@ -155,7 +157,7 @@ async function handleCustomerLogout() {
             >
               {{ totalQty > 99 ? '99+' : totalQty }}
             </span>
-          </NuxtLink>
+          </button>
           <template v-if="user">
             <span class="hidden text-neutral-600 sm:inline">
               {{ user.email }}
@@ -224,6 +226,8 @@ async function handleCustomerLogout() {
     <main class="flex-1">
       <slot />
     </main>
+
+    <StoreCartDrawer />
 
     <footer class="border-t border-neutral-200">
       <div

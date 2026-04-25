@@ -185,7 +185,7 @@ async function handleAddToCart() {
     unitPrice: price,
     optionSummary: optionSummaryText(),
   })
-  await navigateTo('/cart')
+  cartHint.value = '已加入購物車'
 }
 </script>
 
