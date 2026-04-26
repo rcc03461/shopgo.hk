@@ -25,7 +25,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
   })
 
   if (!me.user) {
+    // 登入/註冊頁允許匿名訪問，避免重複導回自己造成循環
+    if (isAdminPublicEntry) return
     return navigateTo(`/admin/login?redirect=${encodeURIComponent(to.fullPath)}`)
+  }
+
+  // 已登入就不應停留在登入/註冊頁
+  if (isAdminPublicEntry) {
+    return navigateTo('/admin/dashboard')
   }
 
   if (me.user.shopSlug !== tenantSlug.value) {
