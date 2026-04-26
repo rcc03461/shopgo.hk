@@ -12,8 +12,26 @@ import type {
   HomepageProductSliderProps,
   HomepageProductsModuleConfig,
 } from '../types/homepage'
+import type { LandingProductCard } from '../types/landing'
+import { formatHkd } from './formatHkd'
 
 type IdFactory = (prefix: string) => string
+const DEFAULT_PRODUCT_RECORD_LIMIT = 16
+const MAX_PRODUCT_RECORD_LIMIT = 100
+const DEFAULT_PRODUCT_GRID_COLUMNS = 4
+
+export type HomepagePreviewProductSource = {
+  id: string
+  name: string
+  slug: string
+  priceLabel?: string
+  displayPrice?: string
+  originalPrice?: string | null
+  hasVariants?: boolean
+  variantCount?: number
+  categoryIds: string[]
+  coverUrl: string | null
+}
 
 const MODULE_TYPE_TO_COMPONENT: Record<HomepageModule['moduleType'], HomepageModuleComponentKey> = {
   nav: 'nav1',
@@ -62,6 +80,28 @@ function asRecord(module: HomepageModule): Record<string, any> {
 
 export function createHomepageEditorId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+export function toHomepagePreviewProducts(products: HomepagePreviewProductSource[]): LandingProductCard[] {
+  return products.flatMap((product) => {
+    const categoryIds = product.categoryIds.length ? product.categoryIds : ['']
+    const displayPrice = product.displayPrice ?? product.priceLabel?.replace(/[^\d.]/g, '') ?? '0'
+    return categoryIds.map((categoryId) => ({
+      id: product.id,
+      categoryId,
+      name: product.name,
+      title: product.name,
+      slug: product.slug,
+      priceLabel: product.priceLabel ?? formatHkd(displayPrice),
+      displayPrice,
+      originalPrice: product.originalPrice ?? null,
+      hasVariants: product.hasVariants ?? (product.variantCount ?? 0) > 0,
+      coverUrl: product.coverUrl,
+      imageUrl:
+        product.coverUrl
+        ?? 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=800&q=80',
+    }))
+  })
 }
 
 export function normalizeHomepageModuleOrder(items: HomepageModule[]) {
@@ -147,8 +187,9 @@ export function ensureProductsConfig(module: HomepageModule<'products'>): Homepa
   const source = config.source as Record<string, any>
   if (source.type === 'category') {
     if (typeof source.categoryId !== 'string') source.categoryId = ''
-    if (typeof source.limit !== 'number') source.limit = 8
+    if (typeof source.limit !== 'number') source.limit = DEFAULT_PRODUCT_RECORD_LIMIT
     if (source.limit < 1) source.limit = 1
+    if (source.limit > MAX_PRODUCT_RECORD_LIMIT) source.limit = MAX_PRODUCT_RECORD_LIMIT
     if (source.sort !== 'newest' && source.sort !== 'price_asc' && source.sort !== 'price_desc') {
       source.sort = 'newest'
     }
@@ -164,12 +205,17 @@ export function ensureProductsConfig(module: HomepageModule<'products'>): Homepa
 
   if (!config.ui || typeof config.ui !== 'object') config.ui = {}
   const ui = config.ui as Record<string, any>
-  if (typeof ui.perView !== 'number') ui.perView = 4
+  if (typeof ui.perView !== 'number') ui.perView = 16
   if (ui.perView < 1) ui.perView = 1
+  if (ui.perView > 24) ui.perView = 24
   if (typeof ui.autoplay !== 'boolean') ui.autoplay = false
   if (typeof ui.intervalMs !== 'number') ui.intervalMs = 4000
   if (ui.intervalMs < 1000) ui.intervalMs = 1000
   if (typeof ui.loop !== 'boolean') ui.loop = false
+  if (ui.displayMode !== 'grid' && ui.displayMode !== 'slider') ui.displayMode = 'slider'
+  if (typeof ui.gridColumns !== 'number') ui.gridColumns = DEFAULT_PRODUCT_GRID_COLUMNS
+  if (ui.gridColumns < 1) ui.gridColumns = 1
+  if (ui.gridColumns > 6) ui.gridColumns = 6
   return config as HomepageProductsModuleConfig
 }
 
@@ -333,7 +379,9 @@ export function ensureDynamicModuleProps<T extends HomepageDynamicModule['compon
         props.source = {
           type: 'category',
           categoryId: typeof source.categoryId === 'string' ? source.categoryId : '',
-          limit: typeof source.limit === 'number' ? Math.max(1, source.limit) : 8,
+          limit: typeof source.limit === 'number'
+            ? Math.min(MAX_PRODUCT_RECORD_LIMIT, Math.max(1, source.limit))
+            : DEFAULT_PRODUCT_RECORD_LIMIT,
           sort:
             source.sort === 'newest' || source.sort === 'price_asc' || source.sort === 'price_desc'
               ? source.sort
@@ -351,10 +399,14 @@ export function ensureDynamicModuleProps<T extends HomepageDynamicModule['compon
 
       const ui = props.ui && typeof props.ui === 'object' ? props.ui : {}
       props.ui = {
-        perView: typeof ui.perView === 'number' ? Math.max(1, ui.perView) : 4,
+        perView: typeof ui.perView === 'number' ? Math.min(24, Math.max(1, ui.perView)) : 16,
         autoplay: typeof ui.autoplay === 'boolean' ? ui.autoplay : false,
         intervalMs: typeof ui.intervalMs === 'number' ? Math.max(1000, ui.intervalMs) : 4000,
         loop: typeof ui.loop === 'boolean' ? ui.loop : false,
+        displayMode: ui.displayMode === 'grid' ? 'grid' : 'slider',
+        gridColumns: typeof ui.gridColumns === 'number'
+          ? Math.min(6, Math.max(1, ui.gridColumns))
+          : DEFAULT_PRODUCT_GRID_COLUMNS,
       }
 
       return props as HomepageDynamicModulePropsMap[T]

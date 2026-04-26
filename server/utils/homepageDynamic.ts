@@ -22,6 +22,18 @@ function orderBySortOrder<T extends { sortOrder: number }>(items: T[]) {
   return [...items].sort((a, b) => a.sortOrder - b.sortOrder)
 }
 
+function normalizeProductSliderUi(ui: unknown) {
+  const source = ui && typeof ui === 'object' ? ui as Record<string, unknown> : {}
+  return {
+    perView: typeof source.perView === 'number' ? Math.min(24, Math.max(1, source.perView)) : 16,
+    autoplay: typeof source.autoplay === 'boolean' ? source.autoplay : false,
+    intervalMs: typeof source.intervalMs === 'number' ? Math.max(1000, source.intervalMs) : 4000,
+    loop: typeof source.loop === 'boolean' ? source.loop : false,
+    displayMode: source.displayMode === 'grid' ? 'grid' as const : 'slider' as const,
+    gridColumns: typeof source.gridColumns === 'number' ? Math.min(6, Math.max(1, source.gridColumns)) : 4,
+  }
+}
+
 export function dynamicToLegacyModules(items: HomepageDynamicModule[]): HomepageModule[] {
   return orderBySortOrder(items).map((item, index) => {
     const moduleType = componentToModuleType[item.component]
@@ -39,7 +51,7 @@ export function dynamicToLegacyModules(items: HomepageDynamicModule[]): Homepage
           categories: Array.isArray(props.categories) ? props.categories : [],
           products: Array.isArray(props.products) ? props.products : [],
           source: props.source ?? { type: 'manual', productIds: [], sort: 'manual' },
-          ui: props.ui ?? { perView: 4, autoplay: false, intervalMs: 4000, loop: false },
+          ui: normalizeProductSliderUi(props.ui),
         },
       }
     }
@@ -66,12 +78,7 @@ export function legacyToDynamicModules(items: HomepageModule[]): HomepageDynamic
           productIds: [],
           sort: 'manual',
         },
-        ui: (productsConfig.ui as HomepageDynamicModule<'product_slider1'>['props']['ui'] | undefined) ?? {
-          perView: 4,
-          autoplay: false,
-          intervalMs: 4000,
-          loop: false,
-        },
+        ui: normalizeProductSliderUi(productsConfig.ui),
       }
       return {
         uid: item.moduleKey,

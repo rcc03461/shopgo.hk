@@ -12,7 +12,14 @@ describe('homepageModuleSchema（發佈前驗證）', () => {
       config: {
         title: '精選商品',
         source: { type: 'manual', productIds: [], sort: 'manual' },
-        ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false },
+        ui: {
+          perView: 4,
+          autoplay: false,
+          intervalMs: 4000,
+          loop: false,
+          displayMode: 'grid',
+          gridColumns: 4,
+        },
       },
     })
 

@@ -19,7 +19,7 @@ import { getDb } from '../../../utils/db'
 import { requireStoreTenant } from '../../../utils/storeTenant'
 
 const DEFAULT_PAGE_SIZE = 24
-const MAX_PAGE_SIZE = 48
+const MAX_PAGE_SIZE = 100
 
 const categoryIdSchema = z.string().uuid('分類 id 格式不正確')
 

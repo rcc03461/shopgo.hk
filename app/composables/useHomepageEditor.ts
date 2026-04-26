@@ -10,6 +10,7 @@ import {
   removeCategoryFromDynamicModule,
   removeProductFromDynamicModule,
   toDynamicHomepageModules,
+  toHomepagePreviewProducts,
   updateDynamicModulePropsFromJson,
 } from '../utils/homepageEditor'
 import { resolveDynamicHomepageModules } from '../utils/homepageModuleResolvers'
@@ -26,6 +27,9 @@ type AdminProductOption = {
   name: string
   slug: string
   priceLabel: string
+  displayPrice: string
+  originalPrice: string | null
+  hasVariants: boolean
   categoryIds: string[]
   coverUrl: string | null
 }
@@ -66,6 +70,8 @@ export function useHomepageEditor() {
           title: string
           slug: string
           basePrice: string
+          originalPrice: string | null
+          variantCount: number
           categoryIds?: string[]
           coverUrl?: string | null
         }>
@@ -166,7 +172,14 @@ export function useHomepageEditor() {
       module.props = {
         title: '',
         source: { type: 'manual', productIds: [], sort: 'manual' },
-        ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false },
+        ui: {
+          perView: 16,
+          autoplay: false,
+          intervalMs: 4000,
+          loop: false,
+          displayMode: 'slider',
+          gridColumns: 4,
+        },
       }
     } else {
       module.props = { text: '' }
@@ -209,6 +222,9 @@ export function useHomepageEditor() {
         name: product.title || product.id,
         slug: product.slug || '',
         priceLabel: `HK$${product.basePrice ?? '0'}`,
+        displayPrice: product.basePrice ?? '0',
+        originalPrice: product.originalPrice ?? null,
+        hasVariants: (product.variantCount ?? 0) > 0,
         categoryIds: product.categoryIds ?? [],
         coverUrl: product.coverUrl ?? null,
       })
@@ -220,19 +236,7 @@ export function useHomepageEditor() {
   const resolvedPreviewModules = computed(() =>
     resolveDynamicHomepageModules(draftDynamicItems.value, {
       categories: availableCategories.value.map((item) => ({ id: item.id, label: item.label })),
-      products: availableProducts.value.flatMap((product) => {
-        const categoryIds = product.categoryIds.length ? product.categoryIds : ['']
-        return categoryIds.map((categoryId) => ({
-          id: product.id,
-          categoryId,
-          name: product.name,
-          slug: product.slug,
-          priceLabel: product.priceLabel,
-          imageUrl:
-            product.coverUrl
-            ?? 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=800&q=80',
-        }))
-      }),
+      products: toHomepagePreviewProducts(availableProducts.value),
     }),
   )
 

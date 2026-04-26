@@ -132,7 +132,7 @@ const dynamicProductSourceSchema = z.union([
   z.object({
     type: z.literal('category'),
     categoryId: z.string().trim().min(1).max(80),
-    limit: z.number().int().min(1).max(60),
+    limit: z.number().int().min(1).max(100),
     sort: z.enum(['newest', 'price_asc', 'price_desc']),
   }),
 ])
@@ -178,10 +178,12 @@ const dynamicModuleSchema = z.object({
       ).max(120).optional(),
       source: dynamicProductSourceSchema,
       ui: z.object({
-        perView: z.number().int().min(1).max(8),
+        perView: z.number().int().min(1).max(24),
         autoplay: z.boolean(),
         intervalMs: z.number().int().min(1000).max(120000),
         loop: z.boolean(),
+        displayMode: z.enum(['slider', 'grid']),
+        gridColumns: z.number().int().min(1).max(6),
       }),
     })
     const result = sliderSchema.safeParse(module.props)

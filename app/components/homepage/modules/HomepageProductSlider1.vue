@@ -4,11 +4,27 @@ import type { HomepageProductSliderProps } from '../../../types/homepage'
 const props = defineProps<HomepageProductSliderProps>()
 
 const displayProducts = computed(() => props.products ?? [])
-const perView = computed(() => Math.max(1, props.ui?.perView ?? 4))
+const displayMode = computed(() => props.ui?.displayMode ?? 'slider')
+const perView = computed(() => Math.max(1, props.ui?.perView ?? 16))
+const gridColumns = computed(() => Math.min(6, Math.max(1, props.ui?.gridColumns ?? 4)))
 const currentPage = ref(0)
 const totalPages = computed(() => Math.max(1, Math.ceil(displayProducts.value.length / perView.value)))
+const shouldShowSliderControls = computed(() => displayMode.value === 'slider' && displayProducts.value.length > perView.value)
+
+const gridColumnClass = computed(() => {
+  const classes: Record<number, string> = {
+    1: 'sm:grid-cols-1',
+    2: 'sm:grid-cols-2',
+    3: 'sm:grid-cols-2 lg:grid-cols-3',
+    4: 'sm:grid-cols-2 lg:grid-cols-4',
+    5: 'sm:grid-cols-2 lg:grid-cols-5',
+    6: 'sm:grid-cols-2 lg:grid-cols-6',
+  }
+  return classes[gridColumns.value] ?? classes[4]
+})
 
 const visibleProducts = computed(() => {
+  if (displayMode.value === 'grid') return displayProducts.value
   const start = currentPage.value * perView.value
   return displayProducts.value.slice(start, start + perView.value)
 })
@@ -47,6 +63,7 @@ function goNext() {
 
 function startAutoplay() {
   stopAutoplay()
+  if (displayMode.value !== 'slider') return
   if (!props.ui.autoplay || totalPages.value <= 1) return
   autoplayTimer = setInterval(goNext, Math.max(1000, props.ui.intervalMs))
 }
@@ -62,7 +79,7 @@ watch(
 )
 
 watch(
-  () => [props.ui.autoplay, props.ui.intervalMs, props.ui.loop, totalPages.value],
+  () => [props.ui.autoplay, props.ui.intervalMs, props.ui.loop, totalPages.value, displayMode.value],
   () => startAutoplay(),
 )
 
@@ -81,7 +98,7 @@ onBeforeUnmount(() => {
       <h2 class="text-xl font-semibold tracking-tight text-neutral-900">
         {{ props.title }}
       </h2>
-      <div class="flex items-center gap-2" v-if="displayProducts.length > perView">
+      <div v-if="shouldShowSliderControls" class="flex items-center gap-2">
         <button
           type="button"
           class="rounded border border-neutral-300 px-2 py-1 text-xs text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
@@ -101,7 +118,7 @@ onBeforeUnmount(() => {
         </button>
       </div>
     </div>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-4" :class="gridColumnClass">
       <HomepageProductCard
         v-for="product in visibleProducts"
         :key="product.id"

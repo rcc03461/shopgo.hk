@@ -70,6 +70,8 @@ export type HomepageModuleComponentKey = (typeof HOMEPAGE_COMPONENT_KEYS)[number
 
 export const HOMEPAGE_PRODUCT_SOURCE_SORTS = ['manual', 'newest', 'price_asc', 'price_desc'] as const
 export type HomepageProductSourceSort = (typeof HOMEPAGE_PRODUCT_SOURCE_SORTS)[number]
+export const HOMEPAGE_PRODUCT_DISPLAY_MODES = ['slider', 'grid'] as const
+export type HomepageProductDisplayMode = (typeof HOMEPAGE_PRODUCT_DISPLAY_MODES)[number]
 
 export type HomepageProductSliderSource =
   | {
@@ -92,6 +94,8 @@ export type HomepageProductSliderProps = {
     autoplay: boolean
     intervalMs: number
     loop: boolean
+    displayMode: HomepageProductDisplayMode
+    gridColumns: number
   }
   // 保留舊資料欄位，讓 API/舊前台可以漸進式遷移。
   categories?: LandingCategory[]

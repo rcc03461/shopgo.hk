@@ -2,7 +2,11 @@
 import { landingHero, landingSlides } from '~/data/landing'
 import type { LandingCategory, LandingProductCard } from '~/types/landing'
 import type { HomepageDynamicModule, HomepageModule, HomepageProductSliderProps } from '../types/homepage'
-import { collectHomepageProductCategoryIds, resolveDynamicHomepageModules } from '~/utils/homepageModuleResolvers'
+import {
+  collectHomepageProductCategoryIds,
+  getHomepageProductCategoryPageSizes,
+  resolveDynamicHomepageModules,
+} from '~/utils/homepageModuleResolvers'
 import { toDynamicHomepageModule } from '~/utils/homepageEditor'
 import { formatHkd } from '~/utils/formatHkd'
 
@@ -92,14 +96,18 @@ const {
       : collectHomepageProductCategoryIds(sourceModules)
     const requestedCategoryIdSet = new Set(requestedCategoryIds)
     const requestedCategories = categories.filter((category) => requestedCategoryIdSet.has(category.id))
+    const pageSizesByCategoryId = getHomepageProductCategoryPageSizes(sourceModules)
 
     const productResponses = await Promise.allSettled(
       requestedCategories.map(async (category) => {
+        const pageSize = shouldLoadAllCategoryProducts
+          ? 100
+          : (pageSizesByCategoryId.get(category.id) ?? 16)
         const res = await (fetchApi as any)('/api/store/products', {
           query: {
             categoryId: category.id,
             page: 1,
-            pageSize: 4,
+            pageSize,
           },
         }) as {
           items: Array<{

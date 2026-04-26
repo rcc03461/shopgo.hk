@@ -10,9 +10,14 @@ import {
   removeDynamicHomepageModule,
   toDynamicHomepageModule,
   toDynamicHomepageModules,
+  toHomepagePreviewProducts,
   updateModuleConfigFromJson,
 } from './homepageEditor'
-import { collectHomepageProductCategoryIds, resolveProductSliderProducts } from './homepageModuleResolvers'
+import {
+  collectHomepageProductCategoryIds,
+  getHomepageProductCategoryPageSizes,
+  resolveProductSliderProducts,
+} from './homepageModuleResolvers'
 
 function createModule<T extends HomepageModule['moduleType']>(
   moduleType: T,
@@ -154,13 +159,49 @@ describe('ensureModuleConfig', () => {
         sort: 'manual',
       },
       ui: {
-        perView: 4,
+        perView: 16,
         autoplay: false,
         intervalMs: 4000,
         loop: false,
+        displayMode: 'slider',
+        gridColumns: 4,
       },
     })
     expect(ensureModuleConfig(footerModule)).toEqual({ text: '' })
+  })
+})
+
+describe('preview product mapping', () => {
+  test('保留後台商品價格欄位，讓預覽與正式首頁卡片一致', () => {
+    const result = toHomepagePreviewProducts([
+      {
+        id: 'p1',
+        name: '商品 A',
+        slug: 'product-a',
+        priceLabel: 'HK$160.0000',
+        displayPrice: '160.0000',
+        originalPrice: '180.0000',
+        hasVariants: true,
+        categoryIds: ['cat-a'],
+        coverUrl: 'cover.jpg',
+      },
+    ])
+
+    expect(result).toEqual([
+      {
+        id: 'p1',
+        categoryId: 'cat-a',
+        name: '商品 A',
+        title: '商品 A',
+        slug: 'product-a',
+        priceLabel: 'HK$160.0000',
+        displayPrice: '160.0000',
+        originalPrice: '180.0000',
+        hasVariants: true,
+        coverUrl: 'cover.jpg',
+        imageUrl: 'cover.jpg',
+      },
+    ])
   })
 })
 
@@ -389,10 +430,12 @@ describe('dynamic module conversion', () => {
         sort: 'manual',
       },
       ui: {
-        perView: 4,
+        perView: 16,
         autoplay: false,
         intervalMs: 4000,
         loop: false,
+        displayMode: 'slider',
+        gridColumns: 4,
       },
     })
   })
@@ -418,14 +461,16 @@ describe('dynamic module conversion', () => {
       source: {
         type: 'category',
         categoryId: 'c1',
-        limit: 8,
+        limit: 16,
         sort: 'newest',
       },
       ui: {
-        perView: 4,
+        perView: 16,
         autoplay: false,
         intervalMs: 4000,
         loop: false,
+        displayMode: 'slider',
+        gridColumns: 4,
       },
     })
   })
@@ -507,7 +552,7 @@ describe('product slider resolver', () => {
       {
         title: 'x',
         source: { type: 'manual', productIds: ['p2', 'p1'], sort: 'manual' },
-        ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false },
+        ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false, displayMode: 'slider', gridColumns: 4 },
       },
       { categories: [], products },
     )
@@ -519,10 +564,50 @@ describe('product slider resolver', () => {
       {
         title: 'x',
         source: { type: 'category', categoryId: 'c1', limit: 1, sort: 'price_asc' },
-        ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false },
+        ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false, displayMode: 'slider', gridColumns: 4 },
       },
       { categories: [], products },
     )
     expect(result.map((item) => item.id)).toEqual(['p2'])
+  })
+
+  test('會按分類取得最大的 product_slider1 records 數量', () => {
+    const result = getHomepageProductCategoryPageSizes([
+      {
+        uid: 'm1',
+        component: 'product_slider1',
+        sortOrder: 0,
+        isEnabled: true,
+        props: {
+          title: 'A',
+          source: { type: 'category', categoryId: 'c1', limit: 12, sort: 'newest' },
+          ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false, displayMode: 'grid', gridColumns: 4 },
+        },
+      },
+      {
+        uid: 'm2',
+        component: 'product_slider1',
+        sortOrder: 1,
+        isEnabled: true,
+        props: {
+          title: 'B',
+          source: { type: 'category', categoryId: 'c1', limit: 24, sort: 'newest' },
+          ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false, displayMode: 'slider', gridColumns: 4 },
+        },
+      },
+      {
+        uid: 'm3',
+        component: 'product_slider1',
+        sortOrder: 2,
+        isEnabled: false,
+        props: {
+          title: 'C',
+          source: { type: 'category', categoryId: 'c2', limit: 32, sort: 'newest' },
+          ui: { perView: 4, autoplay: false, intervalMs: 4000, loop: false, displayMode: 'slider', gridColumns: 4 },
+        },
+      },
+    ])
+
+    expect(Object.fromEntries(result)).toEqual({ c1: 24 })
   })
 })

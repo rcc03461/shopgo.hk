@@ -22,6 +22,20 @@ export function collectHomepageProductCategoryIds(modules: HomepageDynamicModule
   return [...ids]
 }
 
+export function getHomepageProductCategoryPageSizes(modules: HomepageDynamicModule[]) {
+  const sizes = new Map<string, number>()
+  for (const module of modules) {
+    if (!module.isEnabled || module.component !== 'product_slider1') continue
+    const props = ensureDynamicModuleProps(module as HomepageDynamicModule<'product_slider1'>)
+    if (props.source.type !== 'category' || !props.source.categoryId) continue
+    sizes.set(
+      props.source.categoryId,
+      Math.max(sizes.get(props.source.categoryId) ?? 0, props.source.limit),
+    )
+  }
+  return sizes
+}
+
 function sortProducts(items: LandingProductCard[], sort: 'newest' | 'price_asc' | 'price_desc') {
   const toPrice = (value: string) => Number(value.replace(/[^\d.]/g, '')) || 0
   if (sort === 'price_asc') return [...items].sort((a, b) => toPrice(a.priceLabel) - toPrice(b.priceLabel))

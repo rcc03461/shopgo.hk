@@ -109,9 +109,29 @@ function clearSelectedProducts() {
         </select>
       </label>
       <label class="text-sm text-neutral-700">
-        <span class="mb-1 block text-xs text-neutral-500">每列顯示數量</span>
+        <span class="mb-1 block text-xs text-neutral-500">展示模式</span>
+        <select
+          v-model="config.ui!.displayMode"
+          class="w-full rounded-md border border-neutral-300 px-3 py-2"
+        >
+          <option value="slider">Slider 輪播</option>
+          <option value="grid">Grid 排版</option>
+        </select>
+      </label>
+      <label class="text-sm text-neutral-700">
+        <span class="mb-1 block text-xs text-neutral-500">Slider 每頁顯示</span>
         <input
           v-model.number="config.ui!.perView"
+          type="number"
+          min="1"
+          max="24"
+          class="w-full rounded-md border border-neutral-300 px-3 py-2"
+        >
+      </label>
+      <label class="text-sm text-neutral-700">
+        <span class="mb-1 block text-xs text-neutral-500">Grid 每列顯示</span>
+        <input
+          v-model.number="config.ui!.gridColumns"
           type="number"
           min="1"
           max="6"
@@ -188,11 +208,12 @@ function clearSelectedProducts() {
         </select>
       </label>
       <label class="text-sm text-neutral-700">
-        <span class="mb-1 block text-xs text-neutral-500">最多顯示</span>
+        <span class="mb-1 block text-xs text-neutral-500">取商品數量</span>
         <input
           v-model.number="config.source.limit"
           type="number"
           min="1"
+          max="100"
           class="w-full rounded-md border border-neutral-300 px-3 py-2"
         >
       </label>
