@@ -11,10 +11,15 @@ import { toDynamicHomepageModule } from '~/utils/homepageEditor'
 import { formatHkd } from '~/utils/formatHkd'
 
 definePageMeta({
-  layout: 'default',
+  // 有租戶子網域用 default；根網域用 landing（見 setPageLayout）
+  layout: false,
 })
 
 const tenantSlug = useState<string | null>('oshop-tenant-slug')
+setPageLayout(tenantSlug.value ? 'default' : 'landing')
+watch(tenantSlug, (slug) => {
+  setPageLayout(slug ? 'default' : 'landing')
+})
 const requestFetch = useRequestFetch()
 
 const {
@@ -236,8 +241,8 @@ const enabledHomepageModules = computed(() =>
 
   <div v-else class="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-24">
   
-    <LandingHeroSection :hero="landingHero" />
-    <LandingSliderSection :slides="landingSlides" />
+    <!-- <LandingHeroSection :hero="landingHero" />
+    <LandingSliderSection :slides="landingSlides" /> -->
 
   </div>
 </template>
