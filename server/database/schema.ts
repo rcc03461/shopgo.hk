@@ -48,6 +48,27 @@ export const tenants = pgTable('tenants', {
     .notNull(),
 })
 
+/** 租戶自訂網域名稱（多筆／驗證狀態由 verified_at） */
+export const tenantCustomDomains = pgTable(
+  'tenant_custom_domains',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    hostname: varchar('hostname', { length: 253 }).notNull().unique(),
+    verificationToken: text('verification_token').notNull(),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index('tenant_custom_domains_tenant_id_idx').on(t.tenantId),
+    index('tenant_custom_domains_hostname_idx').on(t.hostname),
+  ],
+)
+
 /** 租戶金流渠道（Stripe、PayPal 等）；敏感欄位見 secrets_encrypted */
 export type TenantPaymentProviderConfigJson = Record<string, unknown>
 
