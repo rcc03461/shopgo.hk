@@ -58,6 +58,8 @@ export const tenantCustomDomains = pgTable(
       .references(() => tenants.id, { onDelete: 'cascade' }),
     hostname: varchar('hostname', { length: 253 }).notNull().unique(),
     verificationToken: text('verification_token').notNull(),
+    /** Cloudflare for SaaS：custom_hostnames API 建立後的回傳 id（刪網域時會一併刪 CF） */
+    cfCustomHostnameId: varchar('cf_custom_hostname_id', { length: 64 }),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()

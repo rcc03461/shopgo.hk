@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
     .select({
       id: schema.tenantCustomDomains.id,
       hostname: schema.tenantCustomDomains.hostname,
+      cfCustomHostnameId: schema.tenantCustomDomains.cfCustomHostnameId,
       verifiedAt: schema.tenantCustomDomains.verifiedAt,
       createdAt: schema.tenantCustomDomains.createdAt,
     })
@@ -22,6 +23,7 @@ export default defineEventHandler(async (event) => {
     items: rows.map((r) => ({
       id: r.id,
       hostname: r.hostname,
+      cfLinked: r.cfCustomHostnameId != null,
       verifiedAt: r.verifiedAt ? r.verifiedAt.toISOString() : null,
       createdAt: r.createdAt.toISOString(),
     })),

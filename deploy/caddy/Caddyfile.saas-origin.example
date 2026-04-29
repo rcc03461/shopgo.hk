@@ -1,0 +1,39 @@
+# SaaS 回源用 Caddy 範本（不因租戶自訂網域逐一改設定）
+#
+# 重點：Cloudflare for SaaS 邊緣處理客戶 HTTPS；回源多半是 SNI=Falback（例如 shopgo.com.hk）。
+# HTTP Host 會是客戶自訂網域，不需要在 Caddy 為每個客戶加 site 區塊。
+#
+# TLS 作法二選一：
+# A) Cloudflare 後台的「來源伺服器」(Origin Certificate) PEM（建議）：憑證含 shopgo.com.hk 與 *.shopgo.com.hk 即可，
+#    將下方 tls 指到 PEM 檔，整段 :443 只反代 upstream，不依 Host 分列網域名。
+# B) ACME dns challenge：若仍需自動續約 wildcard，可把 tls 區塊改回 tls { dns cloudflare ... }
+#    並確保只綁定「平台」來源域名所要的憑證；仍建議維持單一 :443 → reverse_proxy，勿為每個客戶加 hostname。
+
+(wildcard_config) {
+	# B) 若要 ACME，保留你的 dns cloudflare；
+	# A) Origin PEM 請改成：
+	# tls /etc/caddy/certs/cloudflare-origin.pem /etc/caddy/certs/cloudflare-origin.key
+
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+}
+
+# 若你已用 Origin PEM，可把下面區塊整段改成「僅一段 :443 + tls PEM + reverse_proxy」（見段落末註解）。
+
+*.shopgo.com.hk {
+	import wildcard_config
+	reverse_proxy 127.0.0.1:8555
+}
+
+shopgo.com.hk {
+	import wildcard_config
+	reverse_proxy 127.0.0.1:8555
+}
+
+# ——選項：單一 :443（搭配 Origin PEM 時請用這種格式，並刪／合併上方 blocks）——
+# :443 {
+# 	tls /etc/caddy/certs/cloudflare-origin.pem /etc/caddy/certs/cloudflare-origin.key
+# 	reverse_proxy 127.0.0.1:8555
+# }
+#

@@ -6,6 +6,8 @@ definePageMeta({
 type CustomDomainItem = {
   id: string
   hostname: string
+  /** 是否已在 Cloudflare Custom Hostnames 建立（需 CLOUDFLARE_* 環境變數） */
+  cfLinked?: boolean
   verifiedAt: string | null
   createdAt: string
 }
@@ -19,6 +21,8 @@ type CreateResponse = {
   hostname: string
   verifiedAt: null
   verificationToken: string
+  cfLinked?: boolean
+  cloudflareSyncError?: string
 }
 
 const requestFetch = useRequestFetch()
@@ -200,7 +204,13 @@ async function addDomain() {
       hostname: res.hostname,
       verificationToken: res.verificationToken,
     }
-    actionOk.value = '已新增，請依下方說明完成 DNS 驗證。'
+    if (res.cloudflareSyncError) {
+      actionOk.value = `已儲存網域。Cloudflare 同步失敗：${res.cloudflareSyncError}`
+    } else if (res.cfLinked) {
+      actionOk.value = '已新增；Cloudflare 已註冊 Custom Hostname，請依下方完成 DNS（CNAME／DCV／TXT）。'
+    } else {
+      actionOk.value = '已新增，請依下方說明完成 DNS 驗證。'
+    }
     await refresh()
   } catch (e: unknown) {
     addErr.value = errMessage(e)
@@ -629,6 +639,13 @@ function formatTime(iso: string | null): string {
             <div class="min-w-0">
               <p class="font-mono text-sm font-medium text-neutral-900">
                 {{ row.hostname }}
+                <span
+                  v-if="row.cfLinked"
+                  class="ml-2 inline-flex rounded bg-sky-100 px-1.5 py-0.5 align-middle font-sans text-xs font-medium text-sky-900"
+                  title="已於 Cloudflare Custom Hostnames 註冊"
+                >
+                  CF
+                </span>
               </p>
               <p class="mt-1 text-xs text-neutral-500">
                 新增於 {{ formatTime(row.createdAt) }}

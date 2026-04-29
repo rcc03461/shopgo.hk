@@ -77,6 +77,10 @@ export default defineNuxtConfig({
         : 'dev-only-oshop-jwt-secret'),
     /** 32 bytes base64；加密儲存 Stripe / PayPal 密鑰用（正式環境建議設定） */
     paymentSecretsKey: (process.env.PAYMENT_SECRETS_KEY || '').trim(),
+    /** 伺服器專用：Cloudflare API Token（自訂網域建立 Custom Hostname，勿放進 public） */
+    cloudflareApiToken: (process.env.CLOUDFLARE_API_TOKEN || '').trim(),
+    /** 伺服器專用：shopgo 等平台 zone_id（與 Custom Hostnames 同一 zone） */
+    cloudflareZoneId: (process.env.CLOUDFLARE_ZONE_ID || '').trim(),
   },
 
   sentry: {
