@@ -6,6 +6,7 @@
     "build": "node --max-old-space-size=4096 ./node_modules/nuxt/bin/nuxt.mjs build",
     "dev": "node --max-old-space-size=4096 ./node_modules/nuxt/bin/nuxt.mjs dev --host 0.0.0.0",
     "generate": "node --max-old-space-size=4096 ./node_modules/nuxt/bin/nuxt.mjs generate",
+    "start": "node --max-old-space-size=4096 .output/server/index.mjs",
     "preview": "node --max-old-space-size=4096 ./node_modules/nuxt/bin/nuxt.mjs preview",
     "postinstall": "nuxt prepare",
     "db:generate": "drizzle-kit generate",
